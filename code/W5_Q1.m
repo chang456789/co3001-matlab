@@ -1,19 +1,20 @@
 clc; clear; close all;
 
 fs = 1e6;
-t = -0.0005+1/fs : 1/fs : 0.0005;
-
-N = length(t);
-f = (-N/2:N/2-1)*fs/N;
+t = -0.0005+1/fs:1/fs:0.0005;
 
 mt = 2.2*sin(2*pi*4e3*t) + 1.8*sin(2*pi*8e3*t);
 
 Ac = 2;
 fc = 1e5;
-Ka = 0.2;
 ct = Ac*cos(2*pi*fc*t);
 
+Ka = 0.2;
+
 st = Ac*(1 + Ka*mt).*ct;
+
+N = length(t);
+f = (-N/2:N/2-1)*fs/N;
 
 figure
 
@@ -30,7 +31,7 @@ grid on
 title('|M(f)|')
 xlabel('f (Hz)')
 ylabel('Magnitude')
-xlim([-2*fc-3e4 2*fc+3e4])
+xlim([-fc-3e4 fc+3e4])
 
 subplot(2,2,3)
 plot(t, st, 'b', 'LineWidth', 1)
@@ -45,6 +46,6 @@ grid on
 title('|S(f)|')
 xlabel('f (Hz)')
 ylabel('Magnitude')
-xlim([-2*fc-3e4 2*fc+3e4])
+xlim([-fc-3e4 fc+3e4])
 
 sgtitle('Lab 4 Q1: AM Modulation (Ka = 0.2)')
