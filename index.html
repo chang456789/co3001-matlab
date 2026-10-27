@@ -1,0 +1,1335 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="CO3001 通訊工程 MATLAB 實驗：輸入繁體中文指示即時產生 MATLAB 程式碼，附 W2–W6 課堂題與回家作業詳解。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2317212b'/%3E%3Cpath d='M4 20 Q9 4 14 16 T24 12 T30 14' stroke='%236ea9d6' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<title>CO3001 MATLAB 指令台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: instrument-panel workbench — input left, live code readout right; week-by-week library below */
+:root {
+  --bg: #f2f3f0; --surface: #fbfbf9; --sunk: #e9ebe6; --ink: #17212b; --muted: #5a6570; --line: #d6dad3;
+  --accent: #1d5b86; --accent-ink: #ffffff; --signal: #a8481f; --ok: #2f6b3f; --warn: #9a5a00;
+  --code-bg: #121a22; --code-fg: #d8e0e7; --c-kw: #7fb4e6; --c-str: #e3b07a; --c-num: #c9a3f2; --c-fn: #8fd3b6; --c-ln: #4d5b67;
+  --f-ui: "IBM Plex Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --f-cjk: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1318; --surface: #151c23; --sunk: #1b232b; --ink: #e3e8ec; --muted: #94a1ac; --line: #27323c;
+  --accent: #6ea9d6; --accent-ink: #0b1218; --signal: #e3925f; --ok: #79c08b; --warn: #e0a54a;
+  --code-bg: #0a0f14; --code-fg: #d8e0e7; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1318; --surface: #151c23; --sunk: #1b232b; --ink: #e3e8ec; --muted: #94a1ac; --line: #27323c;
+  --accent: #6ea9d6; --accent-ink: #0b1218; --signal: #e3925f; --ok: #79c08b; --warn: #e0a54a;
+  --code-bg: #0a0f14; --code-fg: #d8e0e7; color-scheme: dark }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 40px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-family: var(--f-ui); }
+.mono { font-family: var(--f-mono); }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; border-bottom: 2px solid var(--ink); padding-bottom: 16px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 600; letter-spacing: -.01em; line-height: 1.15; }
+h1 .m { font-family: var(--f-mono); font-weight: 500; color: var(--accent); }
+.exam { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: 13px; align-items: baseline; }
+.exam dt { color: var(--muted); }
+.exam dd { margin: 0; font-variant-numeric: tabular-nums; }
+.exam .hot { color: var(--signal); font-weight: 600; }
+.fname { font-family: var(--f-mono); background: var(--sunk); padding: 1px 6px; border-radius: 4px; cursor: pointer; border: 1px solid var(--line); }
+
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 14px; }
+h2 { font-size: 20px; font-weight: 600; }
+h2 small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+
+.gen { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .gen { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+label.lab { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+textarea#cmd { width: 100%; min-height: 210px; resize: vertical; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); font-family: var(--f-cjk); font-size: 15px; line-height: 1.7; }
+textarea#cmd:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.hint { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.chips-h { font-size: 12px; color: var(--muted); width: 100%; letter-spacing: .04em; }
+.chip { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; font-family: var(--f-cjk); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.ai-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 6px 12px; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+a.btn { color: inherit; text-decoration: none; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn[disabled] { opacity: .55; cursor: default; }
+.status { font-size: 12.5px; color: var(--muted); }
+.drop { margin-top: 10px; border: 1.5px dashed var(--line); border-radius: var(--r); padding: 12px; background: var(--bg); display: grid; gap: 10px; }
+.drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+.drop-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--muted); }
+.drop-h b { color: var(--ink); font-weight: 600; }
+.kbd { font-family: var(--f-mono); font-size: 11.5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--surface); color: var(--ink); }
+.thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
+.thumb { position: relative; width: 112px; height: 76px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb button { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(0,0,0,.65); color: #fff; font-size: 13px; line-height: 22px; padding: 0; cursor: pointer; }
+.keybox { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; }
+.key-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.key-row input { flex: 1 1 200px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); font-family: var(--f-mono); font-size: 13px; }
+.key-row select { padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); font-size: 13px; }
+
+.out-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.det { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.tag { font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--sunk); border: 1px solid var(--line); white-space: nowrap; }
+.tag.q { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-family: var(--f-mono); }
+.tag.src { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 40%, var(--line)); }
+.tag.bad { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.fn-in { width: 170px; max-width: 100%; padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); font-family: var(--f-mono); font-size: 12.5px; }
+ul.info { margin: 0 0 10px; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 12.5px; color: var(--muted); }
+ul.info li::before { content: "▸ "; color: var(--accent); }
+ul.info b { color: var(--ink); font-weight: 500; }
+
+.code { background: var(--code-bg); color: var(--code-fg); border-radius: var(--r); overflow: auto; max-height: 640px; font-family: var(--f-mono); font-size: 12.8px; line-height: 1.6; padding: 12px 0; counter-reset: ln; }
+.code .l { display: block; padding: 0 14px 0 52px; position: relative; white-space: pre; min-height: 1.6em; }
+.code .l::before { counter-increment: ln; content: counter(ln); position: absolute; left: 0; width: 38px; text-align: right; color: var(--c-ln); user-select: none; }
+.k { color: var(--c-kw); } .s { color: var(--c-str); } .n { color: var(--c-num); } .fx { color: var(--c-fn); } .cm { color: #6f7d88; }
+.empty { color: var(--muted); padding: 24px 16px; font-family: var(--f-cjk); font-size: 14px; white-space: normal; }
+
+.lib-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#q { width: 240px; max-width: 100%; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 6px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+.week { display: grid; gap: 12px; }
+.week + .week { margin-top: 28px; }
+.week-h { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.week-h .wt { font-family: var(--f-mono); font-size: 13px; color: var(--accent); font-weight: 500; }
+.week-h h3 { font-size: 17px; font-weight: 600; }
+.week-h .d { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card.hw { border-left: 3px solid var(--signal); }
+.card.mid { border-left: 3px solid var(--accent); }
+.meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; }
+.meta .kd { color: var(--muted); }
+.meta .kd.hw { color: var(--signal); font-weight: 500; }
+.card h4 { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.4; }
+.ask { font-size: 13.5px; color: var(--muted); margin: 0; font-family: var(--f-cjk); }
+.card ul { margin: 0; padding-left: 18px; font-size: 13.5px; display: grid; gap: 3px; font-family: var(--f-cjk); }
+.card details summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+.card details .code { margin-top: 8px; max-height: 420px; font-size: 12px; }
+.card-act { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: auto; padding-top: 4px; }
+.qn { width: 64px; padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); font-size: 12.5px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 13.5px; z-index: 20; }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+.nav a { font-size: 13px; color: var(--muted); text-decoration: none; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; }
+.nav a:hover { color: var(--accent); border-color: var(--accent); }
+.deck-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.deck-tabs button { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 6px 12px; font-size: 13px; cursor: pointer; text-align: left; }
+.deck-tabs button b { font-family: var(--f-mono); color: var(--accent); font-weight: 500; margin-right: 6px; }
+.deck-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.deck-tabs button[aria-pressed="true"] b { color: inherit; }
+.viewer { margin-top: 14px; display: grid; gap: 10px; }
+.stage { position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; display: grid; place-items: center; cursor: zoom-in; }
+.stage img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.tslide { width: 100%; height: 100%; padding: 5% 7%; color: #17212b; background: #fdfdfb; font-family: var(--f-cjk); overflow: auto; cursor: default; }
+.tslide h4 { margin: 0 0 4%; font-size: clamp(17px, 2.6vw, 30px); font-weight: 700; border-bottom: 2px solid #17212b; padding-bottom: 2%; }
+.tslide ul { margin: 0; padding-left: 1.2em; display: grid; gap: .5em; font-size: clamp(13px, 1.7vw, 20px); line-height: 1.55; }
+.tslide .note { position: absolute; right: 12px; bottom: 8px; font-size: 11px; color: #8a949d; }
+.vbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.vbar .cnt { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+.strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+.strip button { flex: 0 0 auto; width: 104px; aspect-ratio: 16 / 9; padding: 0; border: 2px solid transparent; border-radius: 4px; background: #fff; cursor: pointer; overflow: hidden; position: relative; }
+.strip button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.strip button span { font-size: 10.5px; color: #17212b; display: block; padding: 4px; text-align: left; line-height: 1.3; font-family: var(--f-cjk); }
+.strip button i { position: absolute; left: 3px; bottom: 2px; font-style: normal; font-size: 10px; background: rgba(0,0,0,.6); color: #fff; padding: 0 4px; border-radius: 3px; }
+.strip button[aria-current="true"] { border-color: var(--accent); }
+.zoom { position: fixed; inset: 0; z-index: 30; background: rgba(8,12,16,.92); display: grid; place-items: center; padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
+.zoom img { max-width: 100%; max-height: 100%; object-fit: contain; background: #fff; }
+.zoom .zx { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); }
+.fweek { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 18px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.fweek:first-child { border-top: 1px solid var(--line); }
+@media (max-width: 640px) { .fweek { grid-template-columns: minmax(0, 1fr); } }
+.fweek .wh { font-size: 14px; font-weight: 600; }
+.fweek .wh span { display: block; font-family: var(--f-mono); font-size: 12px; color: var(--accent); font-weight: 500; }
+.flist { display: flex; flex-wrap: wrap; gap: 6px; }
+.file { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 5px 10px; font-size: 13px; color: var(--ink); text-decoration: none; font-family: var(--f-cjk); }
+.file:hover { border-color: var(--accent); color: var(--accent); }
+.file .ext { font-family: var(--f-mono); font-size: 10.5px; padding: 0 5px; border-radius: 3px; background: var(--sunk); color: var(--muted); }
+.file.pdf .ext { background: color-mix(in srgb, var(--signal) 18%, var(--sunk)); color: var(--signal); }
+.file .sz { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.pdfview { width: 100%; height: min(82vh, 900px); border: 1px solid var(--line); border-radius: var(--r); background: #fff; }
+.shots { display: grid; gap: 18px; }
+.shots figure { margin: 0; display: grid; gap: 6px; }
+.shots img { width: 100%; max-width: 1200px; height: auto; border: 1px solid var(--line); border-radius: var(--r); background: #fff; cursor: zoom-in; }
+.shots figcaption { font-size: 13px; color: var(--muted); }
+.missing { border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--line)); background: color-mix(in srgb, var(--warn) 8%, var(--surface)); border-radius: var(--r); padding: 12px 14px; font-size: 14px; }
+.tlist { margin: 6px 0 0; padding-left: 22px; display: grid; gap: 10px; font-size: 14px; font-family: var(--f-cjk); }
+.tlist ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+.foot { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.nores { color: var(--muted); font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .btn, .chip { transition: border-color .15s, color .15s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">CO3001 通訊工程 · MATLAB 實驗</div>
+      <h1>MATLAB <span class="m">指令台</span></h1>
+      <nav class="nav" aria-label="頁面區塊"><a href="#libH">六週題庫</a><a href="#slideH">上課簡報</a><a href="#fileH">課堂檔案</a><a href="#genH">指令台</a></nav>
+    </div>
+    <dl class="exam">
+      <dt>期中考</dt><dd class="hot">10/27（二）18:10 – 20:10</dd>
+      <dt>範圍</dt><dd>先前上課內容（W2 – W6）</dd>
+      <dt>繳交</dt><dd>.m 檔上傳 ee-class，檔名 <span class="fname" id="fnameTag" title="點一下複製">113102516_test1</span></dd>
+      <dt>可使用</dt><dd>作業和上課程式碼</dd>
+    </dl>
+  </header>
+
+  <section aria-labelledby="libH">
+    <div class="sec-h">
+      <h2 id="libH">六週題庫<small>課堂題、回家作業與期中重點 · 程式碼皆已實跑</small></h2>
+      <div class="lib-ctl">
+        <input id="q" type="search" placeholder="搜尋：conv、Ka、fftshift…" aria-label="搜尋題庫">
+        <div class="seg" id="seg" role="group" aria-label="週次"></div>
+      </div>
+    </div>
+    <div id="lib"></div>
+  </section>
+
+  <section aria-labelledby="slideH">
+    <div class="sec-h"><h2 id="slideH">上課簡報<small>老師原始檔，依週次分類</small></h2></div>
+    <div class="deck-tabs" id="deckTabs" role="group" aria-label="選擇簡報"></div>
+    <div class="viewer" id="viewer"></div>
+  </section>
+
+  <section aria-labelledby="fileH">
+    <div class="sec-h"><h2 id="fileH">課堂檔案<small>原始講義 PDF、結報與每一題的 .m 檔</small></h2></div>
+    <div id="files"></div>
+  </section>
+
+  <section aria-labelledby="genH">
+    <div class="sec-h"><h2 id="genH">指令台<small>打字或貼截圖 · 寫「第N題」變數自動加尾碼</small></h2></div>
+    <div class="gen">
+      <div class="panel">
+        <label class="lab" for="cmd">繁體中文指示（可整份題目貼進來，多題用「第1題、第2題…」分開）</label>
+        <textarea id="cmd" spellcheck="false"></textarea>
+        <div class="drop" id="drop">
+          <div class="drop-h"><b>題目截圖</b><span>直接按 <span class="kbd">Ctrl</span>+<span class="kbd">V</span> 貼上、拖曳圖片到這裡，或</span><label class="btn" for="imgIn">選擇圖片</label><input id="imgIn" type="file" accept="image/*" multiple hidden></div>
+          <div class="thumbs" id="thumbs" hidden></div>
+          <div class="ai-row" id="imgRow" hidden>
+            <button class="btn primary" id="readBtn" type="button">讀圖生成</button>
+            <button class="btn" id="readStop" type="button" hidden>停止</button>
+            <span class="status" id="imgStatus"></span>
+          </div>
+        </div>
+        <p class="hint">看得懂的寫法：<span class="mono">2.8 sin(2π·3×10^3 t)</span>、<span class="mono">A1 = 1 V; f1 = 10 Hz</span>、<span class="mono">fs = 240e3</span>、<span class="mono">取樣頻率 100 kHz</span>、<span class="mono">時間 −0.25 ~ 0.25 sec</span>、<span class="mono">Ka = 0.6</span>、<span class="mono">保留 40 Hz</span>、<span class="mono">通帶 80 ~ Hz</span>。沒寫的參數用講義預設。</p>
+        <div class="chips" id="chips"><span class="chips-h">範例（點了會取代輸入）</span></div>
+        <div class="ai-row">
+          <button class="btn" id="gemBtn" type="button" aria-expanded="false">Gemini 設定（選填）</button>
+          <span class="status" id="gemState"></span>
+          <div class="keybox" id="gemBox" hidden>
+            <label class="lab" for="gemKey">Gemini API Key（免費申請，只存在這台電腦的瀏覽器）</label>
+            <div class="key-row">
+              <input id="gemKey" type="password" autocomplete="off" placeholder="AIza..." spellcheck="false">
+              <button class="btn" id="gemSave" type="button">儲存並檢查</button>
+              <button class="btn" id="gemClear" type="button">清除</button>
+            </div>
+            <div class="key-row" style="margin-top:8px"><select id="gemModel" aria-label="Gemini 模型"><option value="">（儲存 Key 後自動列出可用模型）</option></select></div>
+            <p class="hint">沒填 Key：讀圖用瀏覽器內建文字辨識，辨識出的文字會填進上面的框，數字請自己看一眼再用。有填 Key：改由 Gemini 直接看圖寫程式碼，公式比較準。申請：到 aistudio.google.com 登入 Google 帳號 → Get API key → Create API key。</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel" aria-live="polite">
+        <div class="out-head">
+          <div class="det" id="det"></div>
+          <div class="tools">
+            <button class="btn" id="copyBtn" type="button">複製程式碼</button>
+            <input class="fn-in" id="fname" value="113102516_test1.m" aria-label="存檔檔名">
+            <button class="btn" id="saveBtn" type="button">下載 .m</button>
+          </div>
+        </div>
+        <ul class="info" id="info"></ul>
+        <pre class="code" id="out"></pre>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">整個資料夾可離線使用：解壓縮後直接開 index.html。程式碼以 GNU Octave 實際執行驗證（繪圖部分以檢查器代跑，正式圖形請在學校 MATLAB 確認）。W5 AM 的投影片程式碼是圖片，題庫版本依講義參數重建；W6 與 Nyquist 照老師投影片，只把頻率軸統一成 (−N/2:N/2−1)*fs/N。</p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const MGEN = (() => {
+  const NUM = String.raw`[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?`;
+  const POW = String.raw`(?:\s*\*\s*10\s*\^\s*\{?\s*([-+]?\d+)\s*\}?)?`;
+  const UNIT = String.raw`\s*(k|K|M|千)?\s*(?:Hz|hz|HZ|赫茲)?`;
+  const CN = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10 };
+
+  function normalize(s) {
+    return s
+      .replace(/[，]/g, ',').replace(/[：]/g, ':').replace(/[＝]/g, '=').replace(/[；]/g, ';')
+      .replace(/[～〜]/g, '~').replace(/[（]/g, '(').replace(/[）]/g, ')').replace(/[［]/g, '[').replace(/[］]/g, ']')
+      .replace(/π/g, 'pi').replace(/[−–—]/g, '-').replace(/[×·⋅∙]/g, '*').replace(/＋/g, '+')
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+      .replace(/　/g, ' ').replace(/ｋ/g, 'k').replace(/ＨＺ|Ｈｚ/g, 'Hz')
+      .replace(/(\d)\s*(?:kHz|KHz|khz)/g, '$1 kHz').replace(/(\d)\s*MHz/g, '$1 MHz');
+  }
+  function val(n, pow, unit) {
+    let v = parseFloat(n);
+    if (pow) v *= Math.pow(10, parseInt(pow, 10));
+    if (unit === 'k' || unit === 'K' || unit === '千') v *= 1e3;
+    if (unit === 'M') v *= 1e6;
+    return v;
+  }
+  function fm(n) {
+    if (!isFinite(n)) return String(n);
+    n = +(+n).toPrecision(12);
+    if (Number.isInteger(n) && Math.abs(n) >= 1000) {
+      let e = 0, m = n;
+      while (m % 10 === 0) { m /= 10; e++; }
+      if (e >= 3) {
+        if (Math.abs(m) < 10) return `${m}e${e}`;
+        const e3 = Math.floor(e / 3) * 3;
+        return `${n / Math.pow(10, e3)}e${e3}`;
+      }
+    }
+    return String(n);
+  }
+  function niceUp(v, steps = [1, 1.5, 2, 2.5, 3, 5]) {
+    if (v <= 0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v)));
+    for (const s of steps) if (s * p >= v * (1 - 1e-9)) return +(s * p).toPrecision(6);
+    return 10 * p;
+  }
+
+  function findQn(seg) {
+    const m = seg.match(/第\s*([0-9]+|[一二三四五六七八九十]+)\s*題/) || seg.match(/(?:^|[^A-Za-z])Q\s*([0-9]+)/) || seg.match(/題號\s*[:=]?\s*([0-9]+)/);
+    if (!m) return null;
+    const s = m[1];
+    if (/^\d+$/.test(s)) return parseInt(s, 10);
+    if (s === '十') return 10;
+    if (s.length === 2 && s[0] === '十') return 10 + CN[s[1]];
+    return CN[s] || null;
+  }
+
+  function splitQuestions(text) {
+    const re = /第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/g;
+    const idx = [];
+    let m;
+    while ((m = re.exec(text))) idx.push(m.index);
+    if (idx.length <= 1) return [text];
+    const segs = [];
+    if (text.slice(0, idx[0]).trim()) segs.push(text.slice(0, idx[0]));
+    for (let i = 0; i < idx.length; i++) segs.push(text.slice(idx[i], idx[i + 1]));
+    const out = [];
+    for (const s of segs) {
+      if (!out.length || /第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/.test(s)) out.push(s);
+      else out[out.length - 1] += s;
+    }
+    if (out.length > 1 && !/第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/.test(out[0])) { out[1] = out[0] + out[1]; out.shift(); }
+    return out;
+  }
+
+  function parse(raw) {
+    const s = normalize(raw);
+    let w = s;
+    const P = { notes: [], given: {} };
+    const take = (re) => { const m = w.match(re); if (m) w = w.replace(m[0], ' \u0000 '); return m; };
+
+    let m;
+    m = take(new RegExp(String.raw`fs_num\s*=\s*\[([^\]]+)\]`));
+    if (!m && /nyquist|奈奎|奈氏|混疊|alias|重建|取樣定理|不同取樣|多個取樣|取樣頻率分別|分別為|各種取樣|fs_num|stem/i.test(s)) m = take(new RegExp(String.raw`(?:取樣頻率|取樣率|採樣頻率|fs)(?!_)[^0-9\[\n]{0,14}\[?\s*((?:${NUM}${UNIT}\s*[、,/和與及 \t]+[ \t]*)+${NUM}${UNIT})\]?`));
+    if (m) {
+      const list = [...m[1].matchAll(new RegExp(String.raw`(${NUM})${POW}${UNIT}`, 'g'))].map(x => val(x[1], x[2], x[3])).filter(v => v > 0);
+      if (list.length >= 2) P.fsList = list;
+    }
+    m = take(new RegExp(String.raw`(?:取樣頻率|取樣率|採樣頻率|sampling\s*(?:freq|frequency|rate)|\bfs)(?!_)\s*(?:為|是|=|:|設為|設定為|用)?\s*(${NUM})${POW}${UNIT}`, 'i'));
+    if (m) P.fs = val(m[1], m[2], m[3]);
+
+    m = take(new RegExp(String.raw`(?:載波頻率|\bf_?c)\s*(?:為|是|=|:|設為)?\s*(${NUM})${POW}${UNIT}`, 'i'));
+    if (m) P.fc = val(m[1], m[2], m[3]);
+    m = take(new RegExp(String.raw`(?:載波振幅|\bA_?c)\s*(?:為|是|=|:|設為)?\s*(${NUM})`, 'i'));
+    if (m) P.Ac = parseFloat(m[1]);
+    m = take(new RegExp(String.raw`(?:\bK_?a|調變指數|調變係數|調變靈敏度)\s*(?:改為|改成|設為|為|是|=|:)?\s*(${NUM})`, 'i'));
+    if (m) P.Ka = parseFloat(m[1]);
+    m = take(new RegExp(String.raw`(?:\balpha|α|放電係數)\s*(?:改為|設為|為|是|=|:)?\s*(${NUM})`, 'i'));
+    if (m) P.alpha = parseFloat(m[1]);
+    m = take(new RegExp(String.raw`(?:\bf_?0|弦波頻率|訊號頻率|原始頻率)\s*(?:為|是|=|:|設為)?\s*(${NUM})${POW}${UNIT}`, 'i'));
+    if (m) P.f0 = val(m[1], m[2], m[3]);
+
+    m = take(new RegExp(String.raw`(?:頻率範圍|頻域範圍|頻譜範圍|\bf\s*:)\s*(?:可設為|可設|設為|為|是|=|:)?\s*(${NUM})${POW}${UNIT}\s*(?:~|到|至)\s*(${NUM})${POW}${UNIT}`, 'i'));
+    if (m) P.frange = [val(m[1], m[2], m[3]), val(m[4], m[5], m[6])];
+
+    const TU = String.raw`\s*(ms|msec|毫秒|us|μs|微秒|s|sec|秒)?`;
+    const tconv = (v, u) => (u && /^(ms|msec|毫秒)$/.test(u) ? v / 1e3 : u && /^(us|μs|微秒)$/.test(u) ? v / 1e6 : v);
+    m = take(new RegExp(String.raw`\bt\s*=\s*(${NUM})(?:\s*\+\s*(?:1\/fs|dt))?\s*:\s*[^:\n]+:\s*(${NUM})`));
+    if (m) P.trange = [parseFloat(m[1]), parseFloat(m[2])];
+    if (!P.trange) {
+      m = take(new RegExp(String.raw`(?:時間|time|時域範圍|觀察區間)\s*(?:範圍|區間)?\s*(?:為|是|=|:|取)?\s*(${NUM})${TU}\s*(?:~|到|至)\s*(${NUM})${TU}`, 'i'));
+      if (m) { const u = m[2] || m[4]; P.trange = [tconv(parseFloat(m[1]), u), tconv(parseFloat(m[3]), u)]; }
+    }
+    if (!P.trange) {
+      m = take(new RegExp(String.raw`(?:時間|time)[^0-9±\n]{0,8}±\s*(${NUM})${TU}`, 'i'));
+      if (m) { const v = tconv(parseFloat(m[1]), m[2]); P.trange = [-v, v]; }
+    }
+
+    m = take(new RegExp(String.raw`通帶\s*(?:可設為|設為|為|是|=|:)?\s*(${NUM})${UNIT}\s*(?:~|到|至)\s*(?:(${NUM})${UNIT})?\s*(以上)?`));
+    if (m) { P.pass = [parseFloat(m[1]) * (m[2] ? 1e3 : 1), m[3] ? parseFloat(m[3]) * (m[4] ? 1e3 : 1) : null]; }
+    if (!P.pass) {
+      m = take(new RegExp(String.raw`(${NUM})${UNIT}\s*以上`));
+      if (m) P.pass = [val(m[1], null, m[2]), null];
+    }
+    m = take(new RegExp(String.raw`截止(?:頻率)?\s*(?:可設為|設為|為|是|=|:)?\s*(${NUM})${UNIT}`));
+    if (m) P.cutoff = val(m[1], null, m[2]);
+
+    const kept = s.match(/保留([^。;\n]{0,40}?)(?:並|，|,|。|;|$)/);
+    if (kept) P.keep = [...kept[1].matchAll(new RegExp(String.raw`(${NUM})${UNIT}`, 'g'))].map(x => val(x[1], null, x[2]));
+
+    const tones = [];
+    const reTone = new RegExp(String.raw`([+-])?\s*(${NUM}|\d*\.?\d+)?\s*\*?\s*(sin|cos)\s*\(\s*2\s*\*?\s*pi\s*\*?\s*\(?\s*(${NUM})${POW}\s*(k|K)?\s*\)?\s*\*?\s*t\s*\)`, 'g');
+    for (const x of s.matchAll(reTone)) {
+      let A = x[2] !== undefined && x[2] !== '' ? parseFloat(x[2]) : 1;
+      if (x[1] === '-') A = -Math.abs(A);
+      tones.push({ A, F: val(x[4], x[5], x[6]), fn: x[3] });
+    }
+    {
+      const pairs = [];
+      for (const x of s.matchAll(new RegExp(String.raw`A_?(\d)\s*=\s*(${NUM})\s*V?[^A]{0,12}?f_?\1\s*=\s*(${NUM})${POW}${UNIT}`, 'g')))
+        pairs.push({ A: parseFloat(x[2]), F: val(x[3], x[4], x[5]), fn: 'sin' });
+      if (pairs.length && pairs.length >= tones.length) tones.splice(0, tones.length, ...pairs);
+    }
+    if (!tones.length) {
+      for (const x of s.matchAll(new RegExp(String.raw`A_?(\d)\s*=\s*(${NUM})\s*V?[^A]{0,12}?f_?\1\s*=\s*(${NUM})${POW}${UNIT}`, 'g')))
+        tones.push({ A: parseFloat(x[2]), F: val(x[3], x[4], x[5]), fn: 'sin' });
+    }
+    if (!tones.length) {
+      for (const x of s.matchAll(new RegExp(String.raw`振幅\s*(?:為|是|=|:)?\s*(${NUM})\s*V?[^振]{0,14}?頻率\s*(?:為|是|=|:)?\s*(${NUM})${POW}${UNIT}`, 'g')))
+        tones.push({ A: parseFloat(x[1]), F: val(x[2], x[3], x[4]), fn: 'sin' });
+      for (const x of s.matchAll(new RegExp(String.raw`頻率\s*(?:為|是|=|:)?\s*(${NUM})${POW}${UNIT}[^頻]{0,10}?振幅\s*(?:為|是|=|:)?\s*(${NUM})`, 'g')))
+        tones.push({ A: parseFloat(x[5]), F: val(x[1], x[2], x[3]), fn: 'sin' });
+    }
+    if (tones.length) {
+      const sm = s.match(/x_?sum\s*=\s*([^\n;。]+)/i);
+      if (sm) {
+        const terms = [...sm[1].matchAll(/([+-])?\s*x_?(\d)/g)];
+        terms.forEach((tm, i) => { const k = parseInt(tm[2], 10) - 1; if (tones[k]) tones[k].A = (tm[1] === '-' ? -1 : 1) * Math.abs(tones[k].A); });
+      } else if (/相減/.test(s)) tones.forEach((t, i) => { if (i > 0) t.A = -Math.abs(t.A); });
+    }
+    P.tones = tones;
+    P.loose = [...w.matchAll(new RegExp(String.raw`(${NUM})${POW}\s*(k|K|M)?\s*(?:Hz|hz|赫茲)`, 'g'))].map(x => val(x[1], x[2], x[3])).filter(v => v > 0);
+
+    const mats = [];
+    for (const x of s.matchAll(/([A-Za-z]\w*)\s*=\s*\[([^\]]*)\]/g)) if (x[1] !== 'fs_num') mats.push({ name: x[1], body: x[2].trim() });
+    P.mats = mats;
+    P.sincA = [...s.matchAll(new RegExp(String.raw`sinc\s*\(\s*(${NUM})?\s*\*?\s*t\s*\)`, 'g'))].map(x => (x[1] ? parseFloat(x[1]) : 1));
+    m = s.match(/(?:前|取|用)?\s*(\d+)\s*(?:個|項)(?:諧波|奇次諧波|項)?/);
+    if (m) P.terms = parseInt(m[1], 10);
+    P.s = s;
+    return P;
+  }
+
+  function detect(P) {
+    const s = P.s;
+    const F = {
+      dsb: /dsb|抑制載波|雙邊帶/i.test(s),
+      am: /(?:^|[^a-z])am(?:[^a-z]|$)|振幅調變|調變指數|\bk_?a\b|包絡|二極體|載波/i.test(s) || P.Ka !== undefined,
+      demod: /解調|demod|還原/i.test(s),
+      env: /包絡|二極體|envelope|峰值追蹤|整流/i.test(s),
+      nyq: /nyquist|奈奎|奈氏|混疊|alias|重建|取樣定理|不同取樣|多個取樣|取樣後|取樣點|stem/i.test(s) || !!P.fsList,
+      lpf: /lpf|低通/i.test(s), bpf: /bpf|帶通/i.test(s), hpf: /hpf|高通/i.test(s),
+      conv: /conv|卷積|摺積|filter\s*\(|移動平均/i.test(s),
+      matrix: /矩陣|轉置|共軛|matrix|逐元素|反矩陣|行列式/i.test(s),
+      square: /方波|傅立葉級數|傅氏級數|fourier\s*series/i.test(s),
+      sinc: /sinc|sin\s*\(\s*x\s*\)\s*\/\s*x/i.test(s),
+      spec: /頻譜|fft|頻域|傅立葉轉換|傅立葉變換|frequency|\|X\(f\)\|/i.test(s),
+      sines: P.tones.length > 0 || /弦波|正弦|餘弦|\bsin\b|\bcos\b/i.test(s),
+    };
+    let kind = null;
+    if (F.dsb) kind = 'dsb';
+    else if (F.am && (/調變|調制|modulation|\bam\b|包絡|二極體/i.test(s))) kind = 'am';
+    else if (F.nyq) kind = 'nyq';
+    else if (F.lpf || F.bpf || F.hpf) kind = 'filter';
+    else if (F.square) kind = 'square';
+    else if (F.sinc) kind = 'sinc';
+    else if (F.conv) kind = 'conv';
+    else if (F.matrix || P.mats.length >= 2) kind = 'matrix';
+    else if (F.sines) kind = 'sines';
+    else if (F.spec && P.tones.length) kind = 'sines';
+    return { kind, F };
+  }
+
+  const NAMES = {
+    dsb: 'DSB-SC 調變＋同步解調', am: 'AM 調變', nyq: 'Nyquist 取樣與重建', filter: 'sinc 濾波器設計',
+    square: '方波傅立葉級數', sinc: 'sinc 波（sin(x)/x）', conv: 'conv / conv same / filter', matrix: '矩陣運算', sines: '弦波疊加',
+  };
+
+  function toneExpr(tones, tv = 't') {
+    return tones.map((t, i) => {
+      const a = Math.abs(t.A);
+      const body = `${a === 1 ? '' : fm(a) + '*'}${t.fn}(2*pi*${fm(t.F)}*${tv})`;
+      if (i === 0) return (t.A < 0 ? '-' : '') + body;
+      return (t.A < 0 ? ' - ' : ' + ') + body;
+    }).join('');
+  }
+  function maxAbs(tones, f0win) {
+    const fmin = Math.min(...tones.map(t => Math.abs(t.F)));
+    const T = 4 / Math.max(fmin, 1e-9);
+    let mx = 0;
+    const n = 20000;
+    for (let i = 0; i < n; i++) {
+      const t = (i / n) * T;
+      let v = 0;
+      for (const k of tones) v += k.A * (k.fn === 'cos' ? Math.cos(2 * Math.PI * k.F * t) : Math.sin(2 * Math.PI * k.F * t));
+      mx = Math.max(mx, Math.abs(v));
+    }
+    return mx;
+  }
+  function plotBlock(L, o) {
+    L.push('', `subplot(${o.sp})`);
+    L.push(`plot(${o.x}, ${o.y}, '${o.c}', 'LineWidth', 1)`);
+    L.push('grid on');
+    L.push(`title('${o.ti}')`, `xlabel('${o.xl}')`, `ylabel('${o.yl}')`);
+    if (o.xlim) L.push(`xlim(${o.xlim})`);
+    if (o.ylim) L.push(`ylim(${o.ylim})`);
+  }
+  function timeVec(L, fs, t0, t1) {
+    L.push(`fs = ${fm(fs)};`, 'dt = 1/fs;', `t = ${fm(t0)} : dt : ${fm(t1)}-dt;`);
+  }
+  function freqAxis(L) { L.push('', 'N = length(t);', 'f = (-N/2:N/2-1)*fs/N;'); }
+  const qtag = (q) => (q ? `Q${q}: ` : '');
+
+  function gSines(P, q, F) {
+    const L = [], info = [];
+    let tones = P.tones;
+    if (!tones.length) { tones = [{ A: 1, F: 3, fn: 'sin' }, { A: 0.8, F: 5, fn: 'sin' }, { A: 0.5, F: 7, fn: 'sin' }]; info.push('未給弦波，使用實驗一第二題的 3/5/7 Hz'); }
+    const fmax = Math.max(...tones.map(t => t.F)), fmin = Math.min(...tones.map(t => t.F));
+    const fs = P.fs || Math.max(100e3, niceUp(50 * fmax));
+    if (!P.fs) info.push(`fs 未指定 → ${fm(fs)}`);
+    const tr = P.trange || [-niceUp(2 / fmin), niceUp(2 / fmin)];
+    if (!P.trange) info.push(`時間未指定 → ${fm(tr[0])} ~ ${fm(tr[1])} s`);
+    timeVec(L, fs, tr[0], tr[1]);
+    L.push('');
+    const multi = tones.length > 1;
+    const sgn = (t, i) => (i === 0 ? (t.A < 0 ? '-' : '') : t.A < 0 ? ' - ' : ' + ');
+    tones.forEach((t, i) => L.push(`x${i + 1} = ${fm(multi ? Math.abs(t.A) : t.A)}*${t.fn}(2*pi*${fm(t.F)}*t);`));
+    if (multi) L.push(`x_sum = ${tones.map((t, i) => sgn(t, i) + `x${i + 1}`).join('')};`);
+    const sig = multi ? 'x_sum' : 'x1';
+    const spec = F.spec;
+    if (spec) freqAxis(L);
+    const rows = (multi ? 2 : 1) + (spec ? 1 : 0);
+    const styles = ["b-", "r--", "k:", "m-.", "g-", "c--"];
+    L.push('', 'figure');
+    let k = 1;
+    if (multi) {
+      L.push('', `subplot(${rows},1,${k++})`);
+      tones.forEach((t, i) => {
+        L.push(`plot(t, x${i + 1}, '${styles[i % styles.length]}', 'LineWidth', 1)`);
+        if (i === 0) L.push('hold on');
+      });
+      L.push('hold off', 'grid on');
+      L.push(`legend(${tones.map((t, i) => `'x_${i + 1} (${fm(t.F)} Hz)'`).join(', ')})`);
+      L.push(`title('${tones.map((t, i) => `x_${i + 1}`).join(', ')}')`, "xlabel('t (sec)')", "ylabel('Amplitude')");
+    }
+    const sumLabel = multi ? 'x_{sum} = ' + tones.map((t, i) => sgn(t, i) + `x_${i + 1}`).join('') : 'x_1(t)';
+    plotBlock(L, { sp: `${rows},1,${k++}`, x: 't', y: sig, c: 'b', ti: sumLabel, xl: 't (sec)', yl: 'Amplitude' });
+    if (spec) {
+      const fr = P.frange || [-niceUp(1.5 * fmax), niceUp(1.5 * fmax)];
+      plotBlock(L, { sp: `${rows},1,${k++}`, x: 'f', y: `abs(fftshift(fft(${sig})))`, c: 'r', ti: multi ? '|X_{sum}(f)|' : '|X_1(f)|', xl: 'f (Hz)', yl: 'Magnitude', xlim: `[${fm(fr[0])} ${fm(fr[1])}]` });
+    }
+    L.push('', `sgtitle('${qtag(q)}${multi ? 'Sinusoids and Their Combination' : 'Sinusoid'}${spec ? ' with Spectrum' : ''}')`);
+    return { L, info };
+  }
+
+  function gFilter(P, q, F) {
+    const L = [], info = [];
+    let tones = P.tones.length ? P.tones : [{ A: 1, F: 10, fn: 'sin' }, { A: 0.8, F: 40, fn: 'sin' }, { A: 0.5, F: 90, fn: 'sin' }];
+    if (!P.tones.length) info.push('未給弦波 → 實驗二的 10/40/90 Hz');
+    const fs = P.fs || 100e3;
+    const tr = P.trange || [-0.25, 0.25];
+    if (!P.fs) info.push('fs 未指定 → 100e3');
+    timeVec(L, fs, tr[0], tr[1]);
+    L.push('');
+    tones.forEach((t, i) => L.push(`x${i + 1} = ${fm(Math.abs(t.A))}*${t.fn}(2*pi*${fm(t.F)}*t);`));
+    L.push(`x = ${tones.map((t, i) => (i === 0 ? (t.A < 0 ? '-' : '') : t.A < 0 ? ' - ' : ' + ') + `x${i + 1}`).join('')};`);
+    freqAxis(L);
+    const fr = sortedF(tones);
+    const types = [F.lpf && 'lpf', F.bpf && 'bpf', F.hpf && 'hpf'].filter(Boolean);
+    const frange = P.frange || [-niceUp(1.5 * Math.max(...fr)), niceUp(1.5 * Math.max(...fr))];
+    const xlimF = `[${fm(frange[0])} ${fm(frange[1])}]`;
+    for (const ty of types) {
+      L.push('');
+      const keep = (P.keep && P.keep.length) ? P.keep : ty === 'lpf' ? [fr[0]] : ty === 'hpf' ? [fr[fr.length - 1]] : [fr[Math.floor(fr.length / 2)]];
+      const kmin = Math.min(...keep), kmax = Math.max(...keep);
+      const below = fr.filter(v => v < kmin), above = fr.filter(v => v > kmax);
+      const lowEdge = () => { const b = below.length ? Math.max(...below) : 0; return Math.max(kmin - 10, (b + kmin) / 2); };
+      const highEdge = () => { const a = above.length ? Math.min(...above) : Infinity; return Math.min(kmax + 10, (kmax + a) / 2, ty === 'lpf' ? kmax + 1 : Infinity); };
+      if (ty === 'lpf') {
+        const c = (P.cutoff && types.length === 1) ? P.cutoff : highEdge();
+        L.push(`B = ${fm(2 * c)};`, 'h_lpf = B*sinc(B*t)/fs;');
+        info.push(`LPF 截止 ${fm(c)} Hz（B = ${fm(2 * c)}，rect(f/B)）`);
+      } else if (ty === 'bpf') {
+        let lo = lowEdge(), hi = highEdge();
+        if (P.pass && P.pass[1] != null && types.length === 1) { lo = P.pass[0]; hi = P.pass[1]; }
+        L.push(`B_out = ${fm(2 * hi)};`, `B_in = ${fm(2 * lo)};`, 'h_bpf = (B_out*sinc(B_out*t) - B_in*sinc(B_in*t))/fs;');
+        info.push(`BPF 通帶 ${fm(lo)}–${fm(hi)} Hz`);
+      } else {
+        let c = lowEdge();
+        if (P.pass && types.length === 1) c = P.pass[0];
+        else if (P.cutoff && types.length === 1) c = P.cutoff;
+        L.push(`B_cut = ${fm(2 * c)};`, 'h_hpf = sinc(fs*t) - B_cut*sinc(B_cut*t)/fs;');
+        info.push(`HPF 通帶 ${fm(c)} Hz 以上（B_cut = ${fm(2 * c)}）`);
+      }
+      L.push(`y_${ty} = conv(x, h_${ty}, 'same');`);
+      L.push('', 'figure');
+      plotBlock(L, { sp: '3,2,1', x: 't', y: 'x', c: 'b', ti: 'x(t)', xl: 't (sec)', yl: 'Amplitude' });
+      plotBlock(L, { sp: '3,2,3', x: 't', y: `h_${ty}`, c: 'k', ti: `h_{${ty}}(t)`, xl: 't (sec)', yl: 'Amplitude' });
+      L.push('', 'subplot(3,2,5)', "plot(t, x, 'c:', 'LineWidth', 1)", 'hold on', `plot(t, y_${ty}, 'b', 'LineWidth', 1)`, 'hold off', 'grid on',
+        `legend('x(t)', 'y_{${ty}}(t)')`, `title('x(t) vs y_{${ty}}(t)')`, "xlabel('t (sec)')", "ylabel('Amplitude')");
+      plotBlock(L, { sp: '3,2,2', x: 'f', y: 'abs(fftshift(fft(x)))', c: 'r', ti: '|X(f)|', xl: 'f (Hz)', yl: 'Magnitude', xlim: xlimF });
+      plotBlock(L, { sp: '3,2,4', x: 'f', y: `abs(fftshift(fft(h_${ty})))`, c: 'k', ti: `|H_{${ty}}(f)|`, xl: 'f (Hz)', yl: 'Magnitude', xlim: xlimF });
+      plotBlock(L, { sp: '3,2,6', x: 'f', y: `abs(fftshift(fft(y_${ty})))`, c: 'r', ti: `|Y_{${ty}}(f)|`, xl: 'f (Hz)', yl: 'Magnitude', xlim: xlimF });
+      L.push('', `sgtitle('${qtag(q)}${ty.toUpperCase()} Design by sinc')`);
+    }
+    return { L, info };
+  }
+  const sortedF = (tones) => [...new Set(tones.map(t => t.F))].sort((a, b) => a - b);
+
+  function gNyq(P, q, F) {
+    const L = [], info = [];
+    let A = 1, fn = 'sin';
+    let f0 = P.f0;
+    let expr = null;
+    if (P.tones.length === 1) { f0 = f0 || P.tones[0].F; A = Math.abs(P.tones[0].A); fn = P.tones[0].fn; }
+    else if (P.tones.length > 1) { expr = toneExpr(P.tones); f0 = f0 || Math.max(...P.tones.map(t => t.F)); A = maxAbs(P.tones); }
+    if (!f0) { f0 = 2e3; info.push('f0 未指定 → 2e3（實驗三）'); }
+    if (/cos/i.test(P.s) && !P.tones.length) fn = 'cos';
+    const fs = P.fs || 240e3;
+    if (!P.fs) info.push('模擬連續的高取樣率 fs → 240e3');
+    const tr = P.trange || [-0.002, 0.002];
+    const list = P.fsList || [1e3, 3e3, 4e3, 5e3, 8e3];
+    if (!P.fsList) info.push('fs_num 未指定 → [1e3 3e3 4e3 5e3 8e3]');
+    timeVec(L, fs, tr[0], tr[1]);
+    L.push('', `f0 = ${fm(f0)};`);
+    L.push(expr ? `y = ${expr};` : `y = ${A === 1 ? '' : fm(A) + '*'}${fn}(2*pi*f0*t);`);
+    L.push('', `fs_num = [${list.map(fm).join(' ')}];`, 'y_sample = zeros(length(fs_num), length(t));', 'for i = 1:length(fs_num)', '    n = round(fs/fs_num(i));', '    idx = 1:n:length(t);', '    y_sample(i, idx) = y(idx);', 'end');
+    L.push('', 'N = length(y);', 'f = (-N/2:N/2-1)*fs/N;', '', 'h_lpf = sinc(2.1*f0*t)/N*(2.1*f0)/2;');
+    L.push('', 'y_lpf = zeros(length(fs_num)+1, length(t));', "y_lpf(1,:) = conv(y, h_lpf, 'same');");
+    const R = 'length(fs_num)+1';
+    const yl = fm(+(1.1 * A).toPrecision(3));
+    L.push('', 'figure');
+    plotBlock(L, { sp: `${R},4,1`, x: 't', y: 'y', c: 'b', ti: 'Original Signal', xl: 't (sec)', yl: 'Amp.', xlim: '[min(t) max(t)]' });
+    L[L.length - 4] = "title(['Original Signal, f_0 = ', num2str(f0), ' Hz'])";
+    L.push('', `subplot(${R},4,2)`, "plot(f, abs(fftshift(fft(y))), 'r', 'LineWidth', 1)", 'hold on',
+      "plot(f, abs(fftshift(fft(h_lpf)))./max(abs(fftshift(fft(h_lpf)))) .* max(abs(fftshift(fft(y)))), 'k', 'LineWidth', 1)",
+      'hold off', 'grid on', 'xlim(6*[-f0 f0])', "title('Freq. Response of Original Signal and LPF')", "xlabel('f (Hz)')", "ylabel('|X(f)| & |H_{LPF}(f)|')");
+    plotBlock(L, { sp: `${R},4,3`, x: 'f', y: 'abs(fftshift(fft(y_lpf(1,:))))', c: 'r', ti: 'Freq. Response of Original Signal Passing LPF', xl: 'f (Hz)', yl: '|Y(f)|', xlim: '6*[-f0 f0]' });
+    plotBlock(L, { sp: `${R},4,4`, x: 't', y: 'y_lpf(1,:)', c: 'b', ti: 'Reduction Signal', xl: 't (sec)', yl: 'Amp.', xlim: '[min(t) max(t)]' });
+    L.push('', 'for i = 1:length(fs_num)',
+      `    subplot(${R},4,4*i+1)`, "    stem(t, y_sample(i,:), 'filled', 'b', 'LineWidth', 1)", '    grid on', '    xlim([min(t) max(t)])', `    ylim([-${yl} ${yl}])`,
+      "    title(['Sampled Signal, f_s = ', num2str(fs_num(i)), ' Hz'])", "    xlabel('t (sec)')", "    ylabel('Amp.')", '',
+      `    subplot(${R},4,4*i+2)`, "    plot(f, abs(fftshift(fft(y_sample(i,:)))), 'r', 'LineWidth', 1)", '    hold on',
+      "    plot(f, abs(fftshift(fft(h_lpf)))./max(abs(fftshift(fft(h_lpf)))) .* max(abs(fftshift(fft(y_sample(i,:))))), 'k', 'LineWidth', 1)",
+      '    hold off', '    grid on', '    xlim(6*[-f0 f0])', "    title('Freq. Response of Sampled Signal and LPF')", "    xlabel('f (Hz)')", "    ylabel('|X_s(f)| & |H_{LPF}(f)|')", '',
+      "    y_lpf(i+1,:) = conv(y_sample(i,:), h_lpf, 'same');", '',
+      `    subplot(${R},4,4*i+3)`, "    plot(f, abs(fftshift(fft(y_lpf(i+1,:)))), 'r', 'LineWidth', 1)", '    grid on', '    xlim(6*[-f0 f0])',
+      "    title('Freq. Response of Sampled Signal Passing LPF')", "    xlabel('f (Hz)')", "    ylabel('|Y_s(f)|')", '',
+      `    subplot(${R},4,4*i+4)`, "    plot(t, y_lpf(i+1,:), 'b', 'LineWidth', 1)", '    grid on', '    xlim([min(t) max(t)])',
+      "    title(['Reduction Signal, f_s = ', num2str(fs_num(i)), ' Hz'])", "    xlabel('t (sec)')", "    ylabel('Amp.')", 'end');
+    L.push('', `sgtitle('${qtag(q)}Nyquist Sampling and Reconstruction')`);
+    const bad = list.filter(v => v <= 2 * f0).map(fm);
+    if (bad.length) info.push(`fs ≤ 2f0（會混疊或臨界）：${bad.join(', ')}`);
+    return { L, info };
+  }
+
+  function modCommon(P, q, info, defTones) {
+    const L = [];
+    let tones = P.tones.length ? P.tones : defTones;
+    if (!P.tones.length) info.push('m(t) 未指定 → 講義預設');
+    const fmax = Math.max(...tones.map(t => t.F)), fmin = Math.min(...tones.map(t => t.F));
+    const fc = P.fc || 1e5, Ac = P.Ac ?? 2;
+    if (!P.fc) info.push('fc 未指定 → 100 kHz');
+    if (P.Ac === undefined) info.push('Ac 未指定 → 2');
+    const fs = P.fs || Math.max(1e6, niceUp(10 * fc));
+    const half = Math.max(0.0005, niceUp(1.5 / fmin));
+    const tr = P.trange || [-half, half];
+    timeVec(L, fs, tr[0], tr[1]);
+    freqAxis(L);
+    L.push('', `mt = ${toneExpr(tones)};`, '', `Ac = ${fm(Ac)};`, `fc = ${fm(fc)};`);
+    return { L, tones, fmax, fc };
+  }
+  const XLM = '[-2*fc-3e4 2*fc+3e4]';
+  function demodPlots(L, rows, et, lpf, yt) {
+    plotBlock(L, { sp: `${rows},2,5`, x: 't', y: et, c: 'b', ti: 'e(t) = s(t)*c(t)', xl: 't (sec)', yl: 'Amplitude' });
+    L.push('', `subplot(${rows},2,6)`, `plot(f, abs(fftshift(fft(${et}))), 'r', 'LineWidth', 1)`, 'hold on',
+      `plot(f, abs(fftshift(fft(${lpf}))) / max(abs(fftshift(fft(${lpf})))) * max(abs(fftshift(fft(${et})))) / 2, 'k', 'LineWidth', 1)`,
+      'hold off', 'grid on', "title('|E(f)| & |H_{LPF}(f)|')", "xlabel('f (Hz)')", "ylabel('Magnitude')", `xlim(${XLM})`);
+    plotBlock(L, { sp: `${rows},2,7`, x: 't', y: yt, c: 'b', ti: 'y(t)', xl: 't (sec)', yl: 'Amplitude' });
+    plotBlock(L, { sp: `${rows},2,8`, x: 'f', y: `abs(fftshift(fft(${yt})))`, c: 'r', ti: '|Y(f)|', xl: 'f (Hz)', yl: 'Magnitude', xlim: XLM });
+  }
+  function modPlots(L, rows) {
+    plotBlock(L, { sp: `${rows},2,1`, x: 't', y: 'mt', c: 'b', ti: 'm(t)', xl: 't (sec)', yl: 'Amplitude' });
+    plotBlock(L, { sp: `${rows},2,2`, x: 'f', y: 'abs(fftshift(fft(mt)))', c: 'r', ti: '|M(f)|', xl: 'f (Hz)', yl: 'Magnitude', xlim: XLM });
+    plotBlock(L, { sp: `${rows},2,3`, x: 't', y: 'st', c: 'b', ti: 's(t)', xl: 't (sec)', yl: 'Amplitude' });
+    plotBlock(L, { sp: `${rows},2,4`, x: 'f', y: 'abs(fftshift(fft(st)))', c: 'r', ti: '|S(f)|', xl: 'f (Hz)', yl: 'Magnitude', xlim: XLM });
+  }
+
+  function gDSB(P, q, F) {
+    const info = [];
+    const { L, fmax } = modCommon(P, q, info, [{ A: 2, F: 6e3, fn: 'sin' }]);
+    const Bf = Math.max(fmax, 8e3);
+    L.push('ct = Ac*cos(2*pi*fc*t);', '', 'st = mt.*ct;', '', 'et = st.*ct;', '', `lpf = sinc(2.5*${fm(Bf)}*t)/N*(2.5*${fm(Bf)})/2;`, '', "yt = conv(et, lpf, 'same');");
+    L.push('', 'figure');
+    modPlots(L, 4);
+    demodPlots(L, 4, 'et', 'lpf', 'yt');
+    L.push('', `sgtitle('${qtag(q)}DSB-SC Modulation and Synchronous Demodulation')`);
+    info.push(`LPF：sinc(2.5×${fm(Bf)}·t)，截止 ±${fm(1.25 * Bf / 1000)} kHz（講義寫法）`);
+    return { L, info };
+  }
+
+  function gAM(P, q, F) {
+    const info = [];
+    const { L, tones } = modCommon(P, q, info, [{ A: 2.2, F: 4e3, fn: 'sin' }, { A: 1.8, F: 8e3, fn: 'sin' }]);
+    const Ka = P.Ka ?? 0.2;
+    if (P.Ka === undefined) info.push('Ka 未指定 → 0.2');
+    const mx = maxAbs(tones);
+    info.push(`max|Ka·m(t)| ≈ ${(Ka * mx).toFixed(3)} ${Ka * mx < 1 ? '< 1（不失真）' : '≥ 1（過調變，包絡檢波會失真）'}`);
+    const fmax = Math.max(...tones.map(t => t.F));
+    const Bf = Math.max(fmax, 8e3);
+    L.push(`Ka = ${fm(Ka)};`, 'ct = Ac*cos(2*pi*fc*t);', '', 'st = Ac*(1 + Ka*mt).*ct;');
+    const sync = F.demod && (!F.env || /同步|乘法|synchronous|coherent/i.test(P.s));
+    if (sync) L.push('', 'et = st.*ct;', '', `lpf = sinc(2.5*${fm(Bf)}*t)/N*(2.5*${fm(Bf)})/2;`, '', "yt = conv(et, lpf, 'same');", 'yt = yt - mean(yt);');
+    L.push('', 'figure');
+    modPlots(L, sync ? 4 : 2);
+    if (sync) demodPlots(L, 4, 'et', 'lpf', 'yt');
+    L.push('', `sgtitle('${qtag(q)}AM Modulation${sync ? ' and Synchronous Demodulation' : ''} (Ka = ${fm(Ka)})')`);
+    if (F.env) {
+      const a = P.alpha ?? 0.95;
+      L.push('', 'x_rect = abs(st);', `alpha = ${fm(a)};`, 'yt_envo = zeros(1, N);', 'yt_envo(1) = x_rect(1);', 'for i = 2:N', '    if x_rect(i) > yt_envo(i-1)', '        yt_envo(i) = x_rect(i);', '    else', '        yt_envo(i) = alpha*yt_envo(i-1);', '    end', 'end', 'yt_env = yt_envo - mean(yt_envo);');
+      L.push('', 'figure', '', 'subplot(3,1,1)', "plot(t, st, 'b', 'LineWidth', 1)", 'hold on', "plot(t, yt_envo, 'k', 'LineWidth', 1.5)", 'hold off', 'grid on', "legend('s(t)', 'envelope')", "title('s(t) and Detected Envelope')", "xlabel('t (sec)')", "ylabel('Amplitude')",
+        '', 'subplot(3,1,2)', "plot(t, x_rect, 'b', 'LineWidth', 1)", 'hold on', "plot(t, yt_envo, 'k', 'LineWidth', 1.5)", 'hold off', 'grid on', "legend('|s(t)|', 'peak tracking')", "title('Rectified Signal and Peak Tracking')", "xlabel('t (sec)')", "ylabel('Amplitude')",
+        '', 'subplot(3,1,3)', "plot(t, mt/max(abs(mt)), 'r--', 'LineWidth', 1)", 'hold on', "plot(t, yt_env/max(abs(yt_env)), 'b', 'LineWidth', 1)", 'hold off', 'grid on', "legend('m(t) (normalized)', 'y_{env}(t) (normalized)')", "title('Envelope Detector Output vs m(t)')", "xlabel('t (sec)')", "ylabel('Normalized Amplitude')",
+        '', `sgtitle('${qtag(q)}AM Envelope (Diode) Detector (Ka = ${fm(Ka)})')`);
+      info.push(`包絡檢波 alpha = ${fm(a)}`);
+    }
+    return { L, info };
+  }
+
+  function gSinc(P, q, F) {
+    const L = [], info = [];
+    const a = P.sincA.length ? P.sincA : [1, 2, 0.5];
+    if (!P.sincA.length) info.push('未指定 sinc(at) → a = 1, 2, 0.5');
+    const fs = P.fs || 100e3, tr = P.trange || [-20, 20];
+    timeVec(L, fs, tr[0], tr[1]);
+    L.push('', `a = [${a.map(fm).join(' ')}];`, 'x = zeros(length(a), length(t));', 'for k = 1:length(a)', '    x(k,:) = sin(pi*a(k)*t) ./ (pi*a(k)*t);', '    x(k, t == 0) = 1;', 'end');
+    if (F.spec) freqAxis(L);
+    const fr = P.frange || [-niceUp(Math.max(...a)), niceUp(Math.max(...a))];
+    L.push('', 'figure', 'for k = 1:length(a)');
+    if (F.spec) {
+      L.push('    subplot(length(a),2,2*k-1)', "    plot(t, x(k,:), 'b', 'LineWidth', 1)", '    grid on', "    title(['sinc(', num2str(a(k)), 't)'])", "    xlabel('t (sec)')", "    ylabel('Amplitude')", '',
+        '    subplot(length(a),2,2*k)', "    plot(f, abs(fftshift(fft(x(k,:)))), 'r', 'LineWidth', 1)", '    grid on', `    xlim([${fm(fr[0])} ${fm(fr[1])}])`, "    title(['|X(f)| of sinc(', num2str(a(k)), 't)'])", "    xlabel('f (Hz)')", "    ylabel('Magnitude')");
+    } else {
+      L.push('    subplot(length(a),1,k)', "    plot(t, x(k,:), 'b', 'LineWidth', 1)", '    grid on', "    title(['sinc(', num2str(a(k)), 't) = sin(\\pi ', num2str(a(k)), 't)/(\\pi ', num2str(a(k)), 't)'])", "    xlabel('t (sec)')", "    ylabel('Amplitude')");
+    }
+    L.push('end', `sgtitle('${qtag(q)}sinc Waves${F.spec ? ' and Spectra' : ''}')`);
+    return { L, info };
+  }
+
+  function gSquare(P, q, F) {
+    const L = [], info = [];
+    const f0 = P.f0 || (P.tones[0] && P.tones[0].F) || 1;
+    const K = P.terms || 5;
+    const fs = P.fs || niceUp(1000 * f0);
+    timeVec(L, fs, -1 / f0, 1 / f0);
+    L.push('', `f0 = ${fm(f0)};`, `K = ${K};`, 'x_sq = sign(sin(2*pi*f0*t));', 'x_fs = zeros(1, length(t));', 'for k = 1:K', '    n = 2*k - 1;', '    x_fs = x_fs + 4/(pi*n)*sin(2*pi*n*f0*t);', 'end');
+    L.push('', 'figure', "plot(t, x_sq, 'k--', 'LineWidth', 1)", 'hold on', "plot(t, x_fs, 'b', 'LineWidth', 1)", 'hold off', 'grid on',
+      "legend('ideal square wave', ['Fourier series, ', num2str(K), ' odd harmonics'])", `title('${qtag(q)}Square Wave by Fourier Series')`, "xlabel('t (sec)')", "ylabel('Amplitude')");
+    info.push(`取前 ${K} 個奇次諧波（1, 3, …, ${2 * K - 1}）`);
+    return { L, info };
+  }
+
+  function gConv(P, q, F) {
+    const L = [], info = [];
+    const vecs = P.mats.filter(m => !m.body.includes(';'));
+    const a = vecs[0] ? vecs[0].body : '1 2 3 4', h = vecs[1] ? vecs[1].body : '1 1 1';
+    if (vecs.length < 2) info.push('未給兩個向量 → a = [1 2 3 4], h = [1 1 1]');
+    L.push(`a = [${a}];`, `h = [${h}];`, '', 'y_conv = conv(a, h)', "y_same = conv(a, h, 'same')", 'y_filt = filter(h, 1, a)', '', 'figure');
+    const items = [['y_conv', 'b', 'conv(a, h)'], ['y_same', 'r', "conv(a, h, ''same'')"], ['y_filt', 'k', 'filter(h, 1, a)']];
+    items.forEach(([v, c, ti], i) => L.push('', `subplot(3,1,${i + 1})`, `stem(0:length(${v})-1, ${v}, 'filled', '${c}', 'LineWidth', 1)`, 'grid on', `title('${ti}')`, "xlabel('n')", "ylabel('Amplitude')"));
+    L.push('', `sgtitle('${qtag(q)}conv vs conv same vs filter')`);
+    return { L, info };
+  }
+
+  function matSize(body) {
+    const rows = body.split(';').map(r => r.trim()).filter(Boolean);
+    const cols = rows.map(r => r.split(/[\s,]+/).filter(Boolean).length);
+    return [rows.length, cols[0] || 0];
+  }
+  function gMatrix(P, q, F) {
+    const L = [], info = [];
+    let mats = P.mats.filter(m => m.name.length <= 3);
+    if (!mats.length) {
+      mats = [{ name: 'A', body: '1 2 3; 4 5 6' }, { name: 'B', body: '3 2 1; 6 5 4' }, { name: 'C', body: '1 2; 3 4; 5 6' }, { name: 'Z', body: '1+2j 3-1j; 2j 4' }];
+      info.push('未給矩陣 → 實驗一第一題的 A、B、C 與複數矩陣 Z');
+    }
+    mats.forEach(m => L.push(`${m.name} = [${m.body.replace(/(\d)\s*i\b/g, '$1j')}]`));
+    const s = P.s;
+    const want = {
+      add: /相加|加法/.test(s), sub: /相減|減法/.test(s), mul: /矩陣乘法|相乘|乘法|(?:^|[^.])\*/.test(s), emul: /逐元素|點乘|\.\*/.test(s),
+      ediv: /逐元素除|\.\/|相除/.test(s), tr: /轉置|\.'/.test(s), ct: /共軛/.test(s), inv: /反矩陣|inv/.test(s), det: /行列式|det/.test(s),
+    };
+    const any = Object.values(want).some(Boolean) && P.mats.length > 0;
+    const sz = Object.fromEntries(mats.map(m => [m.name, matSize(m.body)]));
+    const names = mats.map(m => m.name);
+    L.push('');
+    for (let i = 0; i < names.length; i++) for (let j = 0; j < names.length; j++) {
+      if (i === j) continue;
+      const X = names[i], Y = names[j], [r1, c1] = sz[X], [r2, c2] = sz[Y];
+      const same = r1 === r2 && c1 === c2;
+      if (i < j && same && (!any || want.add)) L.push(`${X}_plus_${Y} = ${X} + ${Y}`);
+      if (i < j && same && (!any || want.sub)) L.push(`${X}_minus_${Y} = ${X} - ${Y}`);
+      if (i < j && same && (!any || want.emul)) L.push(`${X}_etimes_${Y} = ${X} .* ${Y}`);
+      if (i < j && same && (!any && false || want.ediv)) L.push(`${X}_ediv_${Y} = ${X} ./ ${Y}`);
+      if (c1 === r2 && (!any || want.mul) && (i < j || !same)) L.push(`${X}_times_${Y} = ${X} * ${Y}`);
+    }
+    for (const X of names) {
+      const [r, c] = sz[X];
+      const cplx = /j|i/.test(mats.find(m => m.name === X).body);
+      if (!any || want.tr) L.push(`${X}_T = ${X}.'`);
+      if ((!any && cplx) || want.ct) L.push(`${X}_H = ${X}'`);
+      if (r === c && want.inv) L.push(`${X}_inv = inv(${X})`);
+      if (r === c && want.det) L.push(`${X}_det = det(${X})`);
+    }
+    info.push(".' 是轉置、' 是共軛轉置（實數矩陣兩者相同）");
+    return { L, info };
+  }
+
+  const GENS = { dsb: gDSB, am: gAM, nyq: gNyq, filter: gFilter, square: gSquare, sinc: gSinc, conv: gConv, matrix: gMatrix, sines: gSines };
+
+  function renameVars(code, suffix) {
+    const assigned = new Set();
+    for (const line of code.split('\n')) {
+      const m = line.match(/^\s*([A-Za-z]\w*)\s*(?:\([^='"]*\))?\s*=(?!=)/);
+      if (m && !/^(for|if|while|function)$/.test(m[1])) assigned.add(m[1]);
+    }
+    const sfx = (n) => (/\d$/.test(n) ? `${n}_${suffix}` : `${n}${suffix}`);
+    let out = '', i = 0;
+    const isId = (c) => /[A-Za-z0-9_]/.test(c);
+    while (i < code.length) {
+      const c = code[i];
+      if (c === "'") {
+        let k = out.length - 1;
+        while (k >= 0 && out[k] === ' ') k--;
+        const prev = k >= 0 ? out[k] : '';
+        if (prev && (isId(prev) || prev === ')' || prev === ']' || prev === "'" || prev === '.') && out[out.length - 1] !== ' ') { out += c; i++; continue; }
+        let j = i + 1;
+        while (j < code.length) { if (code[j] === "'") { if (code[j + 1] === "'") { j += 2; continue; } break; } j++; }
+        out += code.slice(i, j + 1); i = j + 1; continue;
+      }
+      if (/[A-Za-z_]/.test(c) && !(i > 0 && isId(code[i - 1])) && !(i > 0 && code[i - 1] === '.' && /\d/.test(code[i - 2] || ''))) {
+        let j = i;
+        while (j < code.length && isId(code[j])) j++;
+        const w = code.slice(i, j);
+        const prevChar = code[i - 1] || '';
+        out += assigned.has(w) && !/\d/.test(prevChar) ? sfx(w) : w;
+        i = j; continue;
+      }
+      out += c; i++;
+    }
+    return out;
+  }
+
+  function generateOne(seg, first) {
+    const P = parse(seg);
+    const q = findQn(seg);
+    const { kind, F } = detect(P);
+    if (!kind) return { ok: false, q, seg };
+    const { L, info } = GENS[kind](P, q, F);
+    let code = L.join('\n').replace(/\n{3,}/g, '\n\n');
+    if (q) code = renameVars(code, q);
+    const head = first ? 'clc; clear; close all;\n\n' : '';
+    return { ok: true, q, kind, name: NAMES[kind], info, code: head + code };
+  }
+
+  function generate(text) {
+    const t = (text || '').trim();
+    if (!t) return { parts: [], code: '' };
+    const segs = splitQuestions(normalize(t)).map(s => s.trim()).filter(Boolean);
+    const parts = segs.map((s, i) => generateOne(s, i === 0));
+    const okParts = parts.filter(p => p.ok);
+    if (okParts.length && !parts[0].ok) okParts[0].code = 'clc; clear; close all;\n\n' + okParts[0].code;
+    return { parts, code: okParts.map(p => p.code).join('\n\n') };
+  }
+
+  return { generate, parse, normalize, renameVars, fm };
+})();
+
+</script>
+<script>
+const LIB = {"weeks":[{"id":"w2","tag":"W2","date":"9/15","name":"實驗一 MATLAB 基礎練習"},{"id":"w3","tag":"W3","date":"9/22","name":"實驗二 濾波器設計與頻譜"},{"id":"w4","tag":"W4","date":"9/29","name":"實驗三 Nyquist 取樣"},{"id":"w5","tag":"W5","date":"10/6","name":"實驗四 AM 調變與解調"},{"id":"w6","tag":"W6","date":"10/13","name":"實驗五 DSB-SC 調變與解調"},{"id":"mid","tag":"期中","date":"10/20","name":"速通期中考重點"}],"items":[{"w":"w2","kind":"課堂","no":"第一題","title":"矩陣運算、轉置與共軛轉置","ask":"以空白或逗號隔開元素、分號換列建立矩陣；複數以 j 表示。練習 + − * / .*，並比較轉置 .' 與共軛轉置 '。","pts":["* 是矩陣乘法（列×行），前矩陣的行數要等於後矩陣的列數",".* 是逐元素相乘，兩矩陣大小必須相同",".' 只把列行交換；' 交換後虛部變號（共軛轉置）","驗算：A*C = [22 28; 49 64]，A.*B = [3 4 3; 24 25 24]"],"code":"clc; clear; close all;\n\nA = [1 2 3; 4 5 6]\nB = [3 2 1; 6 5 4]\nC = [1 2; 3 4; 5 6]\n\nA_add = A + B\nA_sub = A - B\nA_mul = A * C\nA_emul = A .* B\nA_ediv = A ./ B\n\nA_T = A.'\n\nZ = [1+2j 3-1j; 2j 4]\nZ_T = Z.'\nZ_H = Z'"},{"w":"w2","kind":"課堂","no":"第二題","title":"時間向量與多個弦波","ask":"時間 −0.2 ~ 0.2 sec，取樣頻率 100 kHz。建立時間向量，產生三個弦波，畫出單獨波形與相加後波形。","pts":["t = 起點 : 1/fs : 終點−1/fs（不取終點，讓 N 為偶數）","完整圖形要有 X 軸標題、Y 軸標題、圖示、圖標題、格線","subplot(m,n,k)：m 列 n 行的第 k 張；sgtitle 下大標題","投影片沒寫三個弦波的數值，這裡用 3／5／7 Hz（振幅 1／0.8／0.5）"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -0.2 : dt : 0.2-dt;\n\nx1 = 1.0*sin(2*pi*3*t);\nx2 = 0.8*sin(2*pi*5*t);\nx3 = 0.5*sin(2*pi*7*t);\nx_sum = x1 + x2 + x3;\n\nfigure\nsubplot(2,1,1)\nplot(t, x1, 'b-', 'LineWidth', 1)\nhold on\nplot(t, x2, 'r--', 'LineWidth', 1)\nplot(t, x3, 'k:', 'LineWidth', 1.5)\nhold off\ngrid on\nlegend('x_1 (3 Hz)', 'x_2 (5 Hz)', 'x_3 (7 Hz)')\ntitle('Three Sinusoids')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(2,1,2)\nplot(t, x_sum, 'b', 'LineWidth', 1)\ngrid on\nlegend('x_{sum} = x_1 + x_2 + x_3')\ntitle('Sum of Three Sinusoids')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsgtitle('Lab 1 Q2: Time Vector and Sinusoids')"},{"w":"w2","kind":"課堂","no":"第三題","title":"用 sin(x)/x 製造 sinc 波","ask":"時間 −20 ~ 20 sec，取樣頻率 100 kHz。用 sin(x)/x 製造多個 sinc 波；x = 0 時另外處理。","pts":["t 剛好有一點等於 0，直接算會得到 0/0 = NaN","if t(n) == 0 就填 1，其餘照公式算","zeros(m,n) 先建零矩陣，length(t) 取長度","共 4,000,000 點，雙層 for 迴圈在 MATLAB 約一兩秒"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -20 : dt : 20-dt;\n\na = [1 2 0.5];\nx = zeros(length(a), length(t));\n\nfor k = 1:length(a)\n    for n = 1:length(t)\n        if t(n) == 0\n            x(k,n) = 1;\n        else\n            x(k,n) = sin(pi*a(k)*t(n)) / (pi*a(k)*t(n));\n        end\n    end\nend\n\nfigure\nfor k = 1:length(a)\n    subplot(3,1,k)\n    plot(t, x(k,:), 'b', 'LineWidth', 1)\n    grid on\n    xlim([-10 10])\n    title(['sinc(', num2str(a(k)), 't) = sin(\\pi ', num2str(a(k)), 't) / (\\pi ', num2str(a(k)), 't)'])\n    xlabel('t (sec)')\n    ylabel('Amplitude')\nend\nsgtitle('Lab 1 Q3: sinc Waves from sin(x)/x')"},{"w":"w2","kind":"課堂","no":"第四題","title":"將 sinc 波做 FFT","ask":"將上一題三組 sinc 波做 fft，並利用 fftshift 與 abs 觀察頻譜大小。頻率範圍 −0.5 ~ 0.5 Hz。","pts":["頻譜三層：abs(fftshift(fft(x)))","頻率軸 f = (−N/2 : N/2−1)*fs/N，df = fs/N = 0.025 Hz","sinc(at) 的頻譜是寬 a 的矩形，高度約 fs/a（1e5／5e4／2e5）","x(k, t == 0) = 1 是第三題 if 的向量化寫法"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -20 : dt : 20-dt;\n\na = [1 2 0.5];\nx = zeros(length(a), length(t));\nfor k = 1:length(a)\n    x(k,:) = sin(pi*a(k)*t) ./ (pi*a(k)*t);\n    x(k, t == 0) = 1;\nend\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nfigure\nfor k = 1:length(a)\n    subplot(3,1,k)\n    plot(f, abs(fftshift(fft(x(k,:)))), 'r', 'LineWidth', 1)\n    grid on\n    xlim([-0.5 0.5])\n    title(['|X(f)| of sinc(', num2str(a(k)), 't)'])\n    xlabel('f (Hz)')\n    ylabel('Magnitude')\nend\nsgtitle('Lab 1 Q4: FFT of sinc Waves')"},{"w":"w2","kind":"課堂","no":"第五題","title":"conv、conv(…,'same') 與 filter","ask":"用小向量觀察 conv、conv(…,'same') 與 filter 的差異。","pts":["conv(a,h) 長度 = length(a)+length(h)−1 → [1 3 6 9 7 4]","conv(a,h,'same') 取中間、長度同 a → [3 6 9 7]","filter(h,1,a) 從頭逐點算、長度同 a → [1 3 6 9]","濾波實驗一律用 conv(…,'same')，輸出才不會偏移"],"code":"clc; clear; close all;\n\na = [1 2 3 4];\nh = [1 1 1];\n\ny_conv = conv(a, h)\ny_same = conv(a, h, 'same')\ny_filt = filter(h, 1, a)\n\nfigure\nsubplot(3,1,1)\nstem(0:length(y_conv)-1, y_conv, 'filled', 'b', 'LineWidth', 1)\ngrid on\ntitle('conv(a, h)')\nxlabel('n')\nylabel('Amplitude')\n\nsubplot(3,1,2)\nstem(0:length(y_same)-1, y_same, 'filled', 'r', 'LineWidth', 1)\ngrid on\ntitle('conv(a, h, ''same'')')\nxlabel('n')\nylabel('Amplitude')\n\nsubplot(3,1,3)\nstem(0:length(y_filt)-1, y_filt, 'filled', 'k', 'LineWidth', 1)\ngrid on\ntitle('filter(h, 1, a)')\nxlabel('n')\nylabel('Amplitude')\n\nsgtitle('Lab 1 Q5: conv vs conv same vs filter')"},{"w":"w2","kind":"作業","no":"作業一","title":".* 與 * 的差異","ask":"請說明矩陣運算中「.*」與「*」的差異為何？","pts":["* 依「列 × 行」內積規則運算，前矩陣行數須等於後矩陣列數，結果大小為（前列數）×（後行數）",".* 把相同位置的元素相乘，兩矩陣大小須完全相同，結果大小不變","範例：A*B = [19 22; 43 50]，A.*B = [5 12; 21 32]"],"code":"clc; clear; close all;\n\nA = [1 2; 3 4];\nB = [5 6; 7 8];\n\ndisp('A * B')\ndisp(A * B)\ndisp('A .* B')\ndisp(A .* B)"},{"w":"w2","kind":"作業","no":"作業二","title":"三個弦波相減","ask":"時間 −0.02 ~ 0.02 sec，取樣頻率 10 kHz；x1 = 4sin(2π6t)、x2 = 2sin(2π4t)、x3 = 1sin(2π2t)，畫出 x_sum = x1 − x2 − x3。","pts":["這是你交的版本，終點取 0.02（N = 401，奇數；本題不做 FFT 所以沒關係）","要做 FFT 的題目就改成 0.02−dt","當初 grid on 打成 grin no 會報「Undefined function」"],"code":"clc; clear; close all;\n\nfs = 10e3;\ndt = 1/fs;\nt = -0.02 : dt : 0.02;\n\nx1 = 4*sin(2*pi*6*t);\nx2 = 2*sin(2*pi*4*t);\nx3 = 1*sin(2*pi*2*t);\nx_sum = x1 - x2 - x3;\n\nfigure\nplot(t, x_sum, 'r-', 'LineWidth', 1.5)\ngrid on\nlegend('x_{sum}')\ntitle('x_{sum} = x_1 - x_2 - x_3')\nxlabel('Time (s)')\nylabel('Amplitude')"},{"w":"w3","kind":"課堂","no":"實驗一","title":"三個弦波疊加與頻譜複習","ask":"低頻 1 V／10 Hz、中頻 0.8 V／40 Hz、高頻 0.5 V／90 Hz，相加得 x。(1) 三種波形畫在一張 subplot(3,1,1) (2) 相加後波形 subplot(3,1,2) (3) fft 與 fftshift 畫 x 的頻譜 subplot(3,1,3)。時間 −0.25 ~ 0.25 sec，fs 100 kHz，頻率範圍 −150 ~ 150 Hz。","pts":["fft 不除以 N，所以峰值 = N·A/2","N = 50000 → 峰值 25000／20000／12500","df = fs/N = 2 Hz，10/40/90 都落在格點上"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -0.25 : dt : 0.25-dt;\n\nx1 = 1*sin(2*pi*10*t);\nx2 = 0.8*sin(2*pi*40*t);\nx3 = 0.5*sin(2*pi*90*t);\nx = x1 + x2 + x3;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\nX = abs(fftshift(fft(x)));\n\nfigure\nsubplot(3,1,1)\nplot(t, x1, 'b-', 'LineWidth', 1)\nhold on\nplot(t, x2, 'r--', 'LineWidth', 1)\nplot(t, x3, 'k:', 'LineWidth', 1.5)\nhold off\ngrid on\nlegend('x_1 (10 Hz)', 'x_2 (40 Hz)', 'x_3 (90 Hz)')\ntitle('x_1, x_2, x_3')\nxlabel('t (sec)')\nylabel('Amplitude (V)')\n\nsubplot(3,1,2)\nplot(t, x, 'b', 'LineWidth', 1)\ngrid on\ntitle('x(t) = x_1 + x_2 + x_3')\nxlabel('t (sec)')\nylabel('Amplitude (V)')\n\nsubplot(3,1,3)\nplot(f, X, 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|X(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsgtitle('Lab 2 Q1: Sum of Sinusoids and Spectrum')"},{"w":"w3","kind":"課堂","no":"實驗二","title":"一個 sinc 設計 LPF","ask":"用一個 sinc 設計低通濾波器，保留 10 Hz，抑制 40 Hz 與 90 Hz。六宮格：x(t) 3,2,1 藍、h_lpf 3,2,3 黑、y_lpf 3,2,5 藍；|X| 3,2,2 紅、|H_lpf| 3,2,4 黑、|Y_lpf| 3,2,6 紅。建議截止 22 Hz，頻域 −150 ~ 150 Hz。","pts":["rect(f/B) ↔ B·sinc(Bt)，離散化再除以 fs","B 是矩形總寬度，真正截止 = B/2（B = 22 → ±11 Hz，照老師手寫）","|H| 在 10/40/90 Hz ≈ 0.936／0.0002／0","sum(h) ≈ 1 是 LPF 的自我檢查"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -0.25 : dt : 0.25-dt;\n\nx1 = 1*sin(2*pi*10*t);\nx2 = 0.8*sin(2*pi*40*t);\nx3 = 0.5*sin(2*pi*90*t);\nx = x1 + x2 + x3;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nB = 22;\nh_lpf = B*sinc(B*t)/fs;\n\ny_lpf = conv(x, h_lpf, 'same');\n\nfigure\nsubplot(3,2,1)\nplot(t, x, 'b', 'LineWidth', 1)\ngrid on\ntitle('x(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,3)\nplot(t, h_lpf, 'k', 'LineWidth', 1)\ngrid on\ntitle('h_{lpf}(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,5)\nplot(t, x, 'c:', 'LineWidth', 1)\nhold on\nplot(t, y_lpf, 'b', 'LineWidth', 1)\nhold off\ngrid on\nlegend('x(t)', 'y_{lpf}(t)')\ntitle('x(t) vs y_{lpf}(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,2)\nplot(f, abs(fftshift(fft(x))), 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|X(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsubplot(3,2,4)\nplot(f, abs(fftshift(fft(h_lpf))), 'k', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|H_{lpf}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsubplot(3,2,6)\nplot(f, abs(fftshift(fft(y_lpf))), 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|Y_{lpf}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsgtitle('Lab 2 Q2: LPF by One sinc')"},{"w":"w3","kind":"課堂","no":"實驗三","title":"兩個 sinc 設計 BPF","ask":"用兩個 sinc 設計帶通濾波器，保留 40 Hz，抑制 10 Hz 與 90 Hz。六宮格同上。","pts":["帶通 = 大矩形 − 小矩形：rect(f/B_out) − rect(f/B_in)","通帶 30–50 Hz → B_out = 100、B_in = 60","老師手寫版用 rect(f/160) − rect(f/40)，通帶 20–80 Hz，兩者都可","BPF 的 sum(h) ≈ 0（0 Hz 在阻帶），不是 1"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -0.25 : dt : 0.25-dt;\n\nx1 = 1*sin(2*pi*10*t);\nx2 = 0.8*sin(2*pi*40*t);\nx3 = 0.5*sin(2*pi*90*t);\nx = x1 + x2 + x3;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nB_out = 100;\nB_in = 60;\nh_bpf = (B_out*sinc(B_out*t) - B_in*sinc(B_in*t))/fs;\n\ny_bpf = conv(x, h_bpf, 'same');\n\nfigure\nsubplot(3,2,1)\nplot(t, x, 'b', 'LineWidth', 1)\ngrid on\ntitle('x(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,3)\nplot(t, h_bpf, 'k', 'LineWidth', 1)\ngrid on\ntitle('h_{bpf}(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,5)\nplot(t, x, 'c:', 'LineWidth', 1)\nhold on\nplot(t, y_bpf, 'b', 'LineWidth', 1)\nhold off\ngrid on\nlegend('x(t)', 'y_{bpf}(t)')\ntitle('x(t) vs y_{bpf}(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,2)\nplot(f, abs(fftshift(fft(x))), 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|X(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsubplot(3,2,4)\nplot(f, abs(fftshift(fft(h_bpf))), 'k', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|H_{bpf}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsubplot(3,2,6)\nplot(f, abs(fftshift(fft(y_bpf))), 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|Y_{bpf}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsgtitle('Lab 2 Q3: BPF by Two sinc')"},{"w":"w3","kind":"作業","no":"回家作業","title":"兩個 sinc 設計 HPF","ask":"用兩個 sinc 設計高通濾波器，保留 90 Hz，抑制 10 Hz 與 40 Hz。建議通帶 80 Hz 以上，頻域 −150 ~ 150 Hz。","pts":["高通 = 全通 − 低通：sinc(fs·t) 就是單位脈衝（全通）","B_cut = 160 → 80 Hz 以上通過","|H| 在 10/40/90 Hz ≈ 0.005／0.007／1.02","投影片第 (6) 題寫 |H_hpf(f)|，應為 |Y_hpf(f)|"],"code":"clc; clear; close all;\n\nfs = 100e3;\ndt = 1/fs;\nt = -0.25 : dt : 0.25-dt;\n\nx1 = 1*sin(2*pi*10*t);\nx2 = 0.8*sin(2*pi*40*t);\nx3 = 0.5*sin(2*pi*90*t);\nx = x1 + x2 + x3;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nB_cut = 160;\nh_hpf = sinc(fs*t) - B_cut*sinc(B_cut*t)/fs;\n\ny_hpf = conv(x, h_hpf, 'same');\n\nfigure\nsubplot(3,2,1)\nplot(t, x, 'b', 'LineWidth', 1)\ngrid on\ntitle('x(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,3)\nplot(t, h_hpf, 'k', 'LineWidth', 1)\ngrid on\ntitle('h_{hpf}(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,5)\nplot(t, x, 'c:', 'LineWidth', 1)\nhold on\nplot(t, y_hpf, 'b', 'LineWidth', 1)\nhold off\ngrid on\nlegend('x(t)', 'y_{hpf}(t)')\ntitle('x(t) vs y_{hpf}(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,2,2)\nplot(f, abs(fftshift(fft(x))), 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|X(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsubplot(3,2,4)\nplot(f, abs(fftshift(fft(h_hpf))), 'k', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|H_{hpf}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsubplot(3,2,6)\nplot(f, abs(fftshift(fft(y_hpf))), 'r', 'LineWidth', 1)\ngrid on\nxlim([-150 150])\ntitle('|Y_{hpf}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\n\nsgtitle('Lab 2 HW: HPF by Two sinc')"},{"w":"w4","kind":"課堂","no":"第1題","title":"固定單一弦波的 Nyquist 取樣與重建","ask":"f0 = 2 kHz 的弦波，用 fs = 240 kHz 模擬連續訊號，再以 fs_num = 1、3、4、5、8 kHz 取樣；畫出時域取樣、取樣頻譜＋LPF、經 LPF 後頻譜、重建波形（6 列 × 4 欄）。","pts":["n = round(fs/fs_num(i)) 每 n 點取一點；idx = 1, 241, 481 …","y_sample 先用 zeros 建 5 列，迴圈把取樣值填進第 i 列","subplot 編號 4*i+1 ~ 4*i+4 → 5、9、13、17…","stem 畫離散取樣點，plot 畫連續曲線","fs = 1000 與 4000 取樣結果都是全零：前者混疊到 0 Hz，後者 fs = 2f0 剛好取在零交越點","h_lpf 直流增益約 124 而不是 1，所以重建振幅不是 1（畫圖時有正規化）"],"code":"clc; clear; close all;\n\nfs = 240e3;\ndt = 1/fs;\nt = -0.002 : dt : 0.002-dt;\n\nf0 = 2e3;\ny = sin(2*pi*f0*t);\n\nfs_num = [1e3 3e3 4e3 5e3 8e3];\ny_sample = zeros(length(fs_num), length(t));\nfor i = 1:length(fs_num)\n    n = round(fs/fs_num(i));\n    idx = 1:n:length(t);\n    y_sample(i, idx) = y(idx);\nend\n\nN = length(y);\nf = (-N/2:N/2-1)*fs/N;\n\nh_lpf = sinc(2.1*f0*t)/N*(2.1*f0)/2;\n\nfigure\nsubplot(length(fs_num)+1,4,1)\nplot(t, y, 'b', 'LineWidth', 1)\ngrid on\nxlim([min(t) max(t)])\ntitle(['Original Signal, f_0 = ', num2str(f0), ' Hz'])\nxlabel('t (sec)')\nylabel('Amp.')\n\nsubplot(length(fs_num)+1,4,2)\nplot(f, abs(fftshift(fft(y))), 'r', 'LineWidth', 1)\nhold on\nplot(f, abs(fftshift(fft(h_lpf)))./max(abs(fftshift(fft(h_lpf)))) .* max(abs(fftshift(fft(y)))), 'k', 'LineWidth', 1)\ngrid on\nxlim(6*[-f0 f0])\ntitle('Freq. Response of Original Signal and LPF')\nxlabel('f (Hz)')\nylabel('|X(f)| & |H_{LPF}(f)|')\nhold off\n\ny_lpf = zeros(length(fs_num)+1, length(t));\ny_lpf(1,:) = conv(y, h_lpf, 'same');\n\nsubplot(length(fs_num)+1,4,3)\nplot(f, abs(fftshift(fft(y_lpf(1,:)))), 'r', 'LineWidth', 1)\ngrid on\nxlim(6*[-f0 f0])\ntitle('Freq. Response of Original Signal Passing LPF')\nxlabel('f (Hz)')\nylabel('|Y(f)|')\n\nsubplot(length(fs_num)+1,4,4)\nplot(t, y_lpf(1,:), 'b', 'LineWidth', 1)\ngrid on\nxlim([min(t) max(t)])\ntitle('Reduction Signal')\nxlabel('t (sec)')\nylabel('Amp.')\n\nfor i = 1:length(fs_num)\n    subplot(length(fs_num)+1,4,4*i+1)\n    stem(t, y_sample(i,:), 'filled', 'b', 'LineWidth', 1)\n    grid on\n    xlim([min(t) max(t)])\n    ylim([-1.1 1.1])\n    xlabel('t (sec)')\n    ylabel('Amp.')\n    title(['Sampled Signal, f_s = ', num2str(fs_num(i)), ' Hz'])\n\n    subplot(length(fs_num)+1,4,4*i+2)\n    plot(f, abs(fftshift(fft(y_sample(i,:)))), 'r', 'LineWidth', 1)\n    hold on\n    plot(f, abs(fftshift(fft(h_lpf)))./max(abs(fftshift(fft(h_lpf)))) .* max(abs(fftshift(fft(y_sample(i,:))))), 'k', 'LineWidth', 1)\n    grid on\n    xlim(6*[-f0 f0])\n    xlabel('f (Hz)')\n    ylabel('|X_s(f)| & |H_{LPF}(f)|')\n    title('Freq. Response of Sampled Signal and LPF')\n    hold off\n\n    y_lpf(i+1,:) = conv(y_sample(i,:), h_lpf, 'same');\n\n    subplot(length(fs_num)+1,4,4*i+3)\n    plot(f, abs(fftshift(fft(y_lpf(i+1,:)))), 'r', 'LineWidth', 1)\n    grid on\n    xlim(6*[-f0 f0])\n    xlabel('f (Hz)')\n    ylabel('|Y_s(f)|')\n    title('Freq. Response of Sampled Signal Passing LPF')\n\n    subplot(length(fs_num)+1,4,4*i+4)\n    plot(t, y_lpf(i+1,:), 'b', 'LineWidth', 1)\n    grid on\n    xlim([min(t) max(t)])\n    xlabel('t (sec)')\n    ylabel('Amp.')\n    title(['Reduction Signal, f_s = ', num2str(fs_num(i)), ' Hz'])\nend\nsgtitle('Lab 3 Q1: Nyquist Sampling and Reconstruction')"},{"w":"w4","kind":"作業","no":"回家作業","title":"問答題參考答案","ask":"1. 解釋 fft()、fftshift() 之作用　2. Sampling 和 Fourier transform 有什麼關聯　3. 如何避免 aliasing　4. 上課程式碼結果截圖　5. 心得","pts":["1. fft(x) 計算離散傅立葉轉換，輸出順序是 0 → fs 的頻率格點；fftshift 把後半段（負頻率）搬到前面，讓 0 Hz 置中，畫圖時頻率軸才能對上 (−N/2:N/2−1)*fs/N","2. 時域取樣 = 乘上脈衝串，頻域就變成原頻譜以 fs 為間隔週期複製（卷積定理）；複製品不重疊的條件是 fs − W > W，即 fs > 2W","3. 提高取樣頻率使 fs > 2fmax；並在取樣「之前」加類比抗混疊低通濾波器，把高於 fs/2 的成分先濾掉","4. 截圖時把 fs = 1000、4000 兩列的縱軸刻度調到看得見（數值約 1e-15）","5. 心得可寫：fs = 4000 剛好等於 2f0 卻取到全零，說明「≥」的臨界條件不可靠，實務要留餘裕"]},{"w":"w5","kind":"課堂","no":"第一題","title":"AM 調變（不失真，Ka = 0.2）","ask":"m(t) = 2.2sin(2π·4k t) + 1.8sin(2π·8k t)，c(t) = Ac cos(2πfc t)，Ac = 2、fc = 100 kHz，s(t) = Ac[1 + Ka m(t)]c(t)。畫 m(t)、|M(f)|、s(t)、|S(f)|。","pts":["投影片程式碼為圖片，此處依講義參數重建，結構同老師寫法","不失真條件 |Ka·m(t)| < 1；max|m| = 3.4933（不是 4），臨界 Ka = 0.2863","|S(f)|：±100 kHz 載波 + 兩側邊帶 92/96/104/108 kHz，頻寬 2W = 16 kHz","頻率軸用 (−N/2:N/2−1)*fs/N（講義的 −N/2+1:N/2 會整條偏一格）"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2.2*sin(2*pi*4e3*t) + 1.8*sin(2*pi*8e3*t);\n\nAc = 2;\nfc = 1e5;\nKa = 0.2;\nct = Ac*cos(2*pi*fc*t);\n\nst = Ac*(1 + Ka*mt).*ct;\n\nfigure\n\nsubplot(2,2,1)\nplot(t, mt, 'b', 'LineWidth', 1)\ngrid on\ntitle('m(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(2,2,2)\nplot(f, abs(fftshift(fft(mt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|M(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(2,2,3)\nplot(t, st, 'b', 'LineWidth', 1)\ngrid on\ntitle('s(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(2,2,4)\nplot(f, abs(fftshift(fft(st))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|S(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsgtitle('Lab 4 Q1: AM Modulation (Ka = 0.2)')"},{"w":"w5","kind":"課堂","no":"第二題","title":"AM 調變＋乘法（同步）解調","ask":"承第一題，e(t) = s(t)c(t)，經 LPF 還原，去直流後與 m(t) 比較。畫 e(t)、|E(f)| & |H_LPF(f)|、y(t)、|Y(f)|。","pts":["e(t) = Ac²[1 + Ka m]cos² → 低頻部分 + 2fc 部分，LPF 留低頻","yt − mean(yt) 去掉 1 帶來的直流","LPF sinc(2.5·8e3·t)/N·(2.5·8e3)/2 直流增益約 490 不是 1（形狀正確）","|H| 畫圖時除以自己的最大值再乘 |E| 最大值的一半，只為了好看"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2.2*sin(2*pi*4e3*t) + 1.8*sin(2*pi*8e3*t);\n\nAc = 2;\nfc = 1e5;\nKa = 0.2;\nct = Ac*cos(2*pi*fc*t);\n\nst = Ac*(1 + Ka*mt).*ct;\n\net = st.*ct;\n\nlpf = sinc(2.5*8e3*t)/N*(2.5*8e3)/2;\n\nyt = conv(et, lpf, 'same');\nyt = yt - mean(yt);\n\nfigure\n\nsubplot(4,2,1)\nplot(t, mt, 'b', 'LineWidth', 1)\ngrid on\ntitle('m(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,2)\nplot(f, abs(fftshift(fft(mt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|M(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,3)\nplot(t, st, 'b', 'LineWidth', 1)\ngrid on\ntitle('s(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,4)\nplot(f, abs(fftshift(fft(st))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|S(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,5)\nplot(t, et, 'b', 'LineWidth', 1)\ngrid on\ntitle('e(t) = s(t)*c(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,6)\nplot(f, abs(fftshift(fft(et))), 'r', 'LineWidth', 1)\nhold on\nplot(f, abs(fftshift(fft(lpf))) / max(abs(fftshift(fft(lpf)))) * max(abs(fftshift(fft(et)))) / 2, 'k', 'LineWidth', 1)\nhold off\ngrid on\ntitle('|E(f)| & |H_{LPF}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,7)\nplot(t, yt, 'b', 'LineWidth', 1)\ngrid on\ntitle('y(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,8)\nplot(f, abs(fftshift(fft(yt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|Y(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsgtitle('Lab 4 Q2: AM Modulation and Synchronous Demodulation (Ka = 0.2)')"},{"w":"w5","kind":"課堂","no":"示範題","title":"二極體（包絡）解調器","ask":"AM 調變後用二極體解調器：整流 + 峰值追蹤（充放電）取出包絡。","pts":["abs(st) 是全波整流（投影片註解寫半波，半波應為 max(st,0)）","輸入比上一點大 → 充電：輸出 = 輸入；否則放電：輸出 = alpha × 上一點","遞迴關係無法向量化，一定要 for 迴圈","alpha 太小漣波大、太大跟不上包絡；Ka = 0.2 時 0.98 最佳"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2.2*sin(2*pi*4e3*t) + 1.8*sin(2*pi*8e3*t);\n\nAc = 2;\nfc = 1e5;\nKa = 0.2;\nct = Ac*cos(2*pi*fc*t);\n\nst = Ac*(1 + Ka*mt).*ct;\n\nx_rect = abs(st);\nalpha = 0.95;\nyt_envo = zeros(1, N);\nyt_envo(1) = x_rect(1);\nfor i = 2:N\n    if x_rect(i) > yt_envo(i-1)\n        yt_envo(i) = x_rect(i);\n    else\n        yt_envo(i) = alpha*yt_envo(i-1);\n    end\nend\nyt_env = yt_envo - mean(yt_envo);\n\nfigure\nsubplot(3,1,1)\nplot(t, st, 'b', 'LineWidth', 1)\nhold on\nplot(t, yt_envo, 'k', 'LineWidth', 1.5)\nhold off\ngrid on\nlegend('s(t)', 'envelope')\ntitle('s(t) and Detected Envelope')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,1,2)\nplot(t, x_rect, 'b', 'LineWidth', 1)\nhold on\nplot(t, yt_envo, 'k', 'LineWidth', 1.5)\nhold off\ngrid on\nlegend('|s(t)|', 'peak tracking')\ntitle('Rectified Signal and Peak Tracking')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,1,3)\nplot(t, mt/max(abs(mt)), 'r--', 'LineWidth', 1)\nhold on\nplot(t, yt_env/max(abs(yt_env)), 'b', 'LineWidth', 1)\nhold off\ngrid on\nlegend('m(t) (normalized)', 'y_{env}(t) (normalized)')\ntitle('Envelope Detector Output vs m(t)')\nxlabel('t (sec)')\nylabel('Normalized Amplitude')\nsgtitle('Lab 4 Demo: AM Envelope (Diode) Detector (Ka = 0.2)')"},{"w":"w5","kind":"作業","no":"作業一","title":"Ka 改為 0.6 的調變比較","ask":"Ka 改為 0.6，附 s(t) 與 S(f) 截圖並與 Ka = 0.2 比較、說明原因。","pts":["max|Ka·m| = 2.096 > 1 → 過調變，1 + Ka·m 有 22.8% 的點為負，包絡反折、相位翻轉 180°","頻域：邊帶高度 ×3（正比於 Ka），載波高度 2000 完全不變（公式裡不含 Ka）","頻寬仍是 2W = 16 kHz，只是邊帶變高"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2.2*sin(2*pi*4e3*t) + 1.8*sin(2*pi*8e3*t);\n\nAc = 2;\nfc = 1e5;\nKa = 0.6;\nct = Ac*cos(2*pi*fc*t);\n\nst = Ac*(1 + Ka*mt).*ct;\n\nfigure\n\nsubplot(2,2,1)\nplot(t, mt, 'b', 'LineWidth', 1)\ngrid on\ntitle('m(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(2,2,2)\nplot(f, abs(fftshift(fft(mt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|M(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(2,2,3)\nplot(t, st, 'b', 'LineWidth', 1)\ngrid on\ntitle('s(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(2,2,4)\nplot(f, abs(fftshift(fft(st))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|S(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsgtitle('Lab 4 HW1: AM Modulation (Ka = 0.6, Over-modulation)')"},{"w":"w5","kind":"作業","no":"作業二","title":"Ka = 0.6 同步解調 vs 二極體解調","ask":"承上 Ka = 0.6，同步解調是否可成功還原？二極體解調器是否可以？","pts":["同步解調可以：乘法把負號原封不動帶到輸出，推導從未假設 1 + Ka·m > 0（相關係數約 0.995）","二極體解調不行：它量的是 |1 + Ka·m|，括號變負就被取絕對值反折（相關係數約 0.84）","結論：Ka·max|m| < 1 是包絡檢波器的限制，不是 AM 本身的限制"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2.2*sin(2*pi*4e3*t) + 1.8*sin(2*pi*8e3*t);\n\nAc = 2;\nfc = 1e5;\nKa = 0.6;\nct = Ac*cos(2*pi*fc*t);\n\nst = Ac*(1 + Ka*mt).*ct;\n\net = st.*ct;\n\nlpf = sinc(2.5*8e3*t)/N*(2.5*8e3)/2;\n\nyt = conv(et, lpf, 'same');\nyt = yt - mean(yt);\n\nfigure\n\nsubplot(4,2,1)\nplot(t, mt, 'b', 'LineWidth', 1)\ngrid on\ntitle('m(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,2)\nplot(f, abs(fftshift(fft(mt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|M(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,3)\nplot(t, st, 'b', 'LineWidth', 1)\ngrid on\ntitle('s(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,4)\nplot(f, abs(fftshift(fft(st))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|S(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,5)\nplot(t, et, 'b', 'LineWidth', 1)\ngrid on\ntitle('e(t) = s(t)*c(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,6)\nplot(f, abs(fftshift(fft(et))), 'r', 'LineWidth', 1)\nhold on\nplot(f, abs(fftshift(fft(lpf))) / max(abs(fftshift(fft(lpf)))) * max(abs(fftshift(fft(et)))) / 2, 'k', 'LineWidth', 1)\nhold off\ngrid on\ntitle('|E(f)| & |H_{LPF}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,7)\nplot(t, yt, 'b', 'LineWidth', 1)\ngrid on\ntitle('y(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,8)\nplot(f, abs(fftshift(fft(yt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|Y(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsgtitle('Lab 4 HW2: Synchronous Demodulation (Ka = 0.6)')\n\nx_rect = abs(st);\nalpha = 0.95;\nyt_envo = zeros(1, N);\nyt_envo(1) = x_rect(1);\nfor i = 2:N\n    if x_rect(i) > yt_envo(i-1)\n        yt_envo(i) = x_rect(i);\n    else\n        yt_envo(i) = alpha*yt_envo(i-1);\n    end\nend\nyt_env = yt_envo - mean(yt_envo);\n\nfigure\nsubplot(3,1,1)\nplot(t, st, 'b', 'LineWidth', 1)\nhold on\nplot(t, yt_envo, 'k', 'LineWidth', 1.5)\nhold off\ngrid on\nlegend('s(t)', 'envelope')\ntitle('s(t) and Detected Envelope')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,1,2)\nplot(t, x_rect, 'b', 'LineWidth', 1)\nhold on\nplot(t, yt_envo, 'k', 'LineWidth', 1.5)\nhold off\ngrid on\nlegend('|s(t)|', 'peak tracking')\ntitle('Rectified Signal and Peak Tracking')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(3,1,3)\nplot(t, mt/max(abs(mt)), 'r--', 'LineWidth', 1)\nhold on\nplot(t, yt_env/max(abs(yt_env)), 'b', 'LineWidth', 1)\nhold off\ngrid on\nlegend('m(t) (normalized)', 'y_{env}(t) (normalized)')\ntitle('Envelope Detector Output vs m(t)')\nxlabel('t (sec)')\nylabel('Normalized Amplitude')\nsgtitle('Lab 4 HW2: Envelope Detector (Ka = 0.6)')"},{"w":"w6","kind":"課堂","no":"第1題","title":"DSB-SC 調變與乘法解調（單音）","ask":"m(t) = 2sin(2π·6×10³t)，c(t) = Ac cos(2πfc t)，Ac = 2、fc = 100 kHz，s(t) = m(t)c(t)，e(t) = s(t)c(t)，LPF 還原 y(t)。畫 m、|M|、s、|S|、e、|E| & |H_LPF|、y、|Y|。","pts":["程式碼照老師投影片，只把頻率軸改成 (−N/2:N/2−1)*fs/N","DSB-SC 沒有載波分量：|S(f)| 只有 fc ± 6 kHz 兩根","e(t) 含低頻 m(t)·Ac²/2 與 2fc 成分，LPF 留下前者","和 AM 比：不含明顯載波分量，功率效率較高；但必須同步解調"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2*sin(2*pi*6e3*t);\n\nAc = 2;\nfc = 1e5;\nct = Ac*cos(2*pi*fc*t);\n\nst = mt.*ct;\n\net = st.*ct;\n\nlpf = sinc(2.5*8e3*t)/N*(2.5*8e3)/2;\n\nyt = conv(et, lpf, 'same');\n\nfigure\nsubplot(4,2,1)\nplot(t, mt, 'b', 'LineWidth', 1)\ngrid on\ntitle('m(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,2)\nplot(f, abs(fftshift(fft(mt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|M(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,3)\nplot(t, st, 'b', 'LineWidth', 1)\ngrid on\ntitle('s(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,4)\nplot(f, abs(fftshift(fft(st))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|S(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,5)\nplot(t, et, 'b', 'LineWidth', 1)\ngrid on\ntitle('e(t) = s(t)*c(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,6)\nplot(f, abs(fftshift(fft(et))), 'r', 'LineWidth', 1)\nhold on\nplot(f, abs(fftshift(fft(lpf))) / max(abs(fftshift(fft(lpf)))) * max(abs(fftshift(fft(et)))) / 2, 'k', 'LineWidth', 1)\nhold off\ngrid on\ntitle('|E(f)| & |H_{LPF}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,7)\nplot(t, yt, 'b', 'LineWidth', 1)\ngrid on\ntitle('y(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,8)\nplot(f, abs(fftshift(fft(yt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|Y(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsgtitle('Lab 5 Q1: DSB-SC Modulation and Synchronous Demodulation (Single Tone)')"},{"w":"w6","kind":"作業","no":"第2題","title":"DSB-SC 調變與乘法解調（雙音）","ask":"m(t) = 2.8sin(2π·3×10³t) + 1.3sin(2π·8×10³t)，載波同上，同樣做 DSB-SC 調變與同步解調，畫出相同八張圖。","pts":["只改 mt 一行，其他照第 1 題","|S(f)| 在 fc ± 3 kHz、fc ± 8 kHz 共四根（每側兩根）","LPF 截止 ±10 kHz（2.5 × 8e3 / 2），8 kHz 成分完整保留","結報用自己 MATLAB 跑的截圖"],"code":"clc; clear; close all;\n\nfs = 1e6;\nt = -0.0005+1/fs : 1/fs : 0.0005;\n\nN = length(t);\nf = (-N/2:N/2-1)*fs/N;\n\nmt = 2.8*sin(2*pi*3e3*t) + 1.3*sin(2*pi*8e3*t);\n\nAc = 2;\nfc = 1e5;\nct = Ac*cos(2*pi*fc*t);\n\nst = mt.*ct;\n\net = st.*ct;\n\nlpf = sinc(2.5*8e3*t)/N*(2.5*8e3)/2;\n\nyt = conv(et, lpf, 'same');\n\nfigure\nsubplot(4,2,1)\nplot(t, mt, 'b', 'LineWidth', 1)\ngrid on\ntitle('m(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,2)\nplot(f, abs(fftshift(fft(mt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|M(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,3)\nplot(t, st, 'b', 'LineWidth', 1)\ngrid on\ntitle('s(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,4)\nplot(f, abs(fftshift(fft(st))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|S(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,5)\nplot(t, et, 'b', 'LineWidth', 1)\ngrid on\ntitle('e(t) = s(t)*c(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,6)\nplot(f, abs(fftshift(fft(et))), 'r', 'LineWidth', 1)\nhold on\nplot(f, abs(fftshift(fft(lpf))) / max(abs(fftshift(fft(lpf)))) * max(abs(fftshift(fft(et)))) / 2, 'k', 'LineWidth', 1)\nhold off\ngrid on\ntitle('|E(f)| & |H_{LPF}(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsubplot(4,2,7)\nplot(t, yt, 'b', 'LineWidth', 1)\ngrid on\ntitle('y(t)')\nxlabel('t (sec)')\nylabel('Amplitude')\n\nsubplot(4,2,8)\nplot(f, abs(fftshift(fft(yt))), 'r', 'LineWidth', 1)\ngrid on\ntitle('|Y(f)|')\nxlabel('f (Hz)')\nylabel('Magnitude')\nxlim([-2*fc-3e4 2*fc+3e4])\n\nsgtitle('Lab 5 Q2: DSB-SC Modulation and Synchronous Demodulation (Two Tones)')"},{"w":"mid","kind":"重點","no":"part 1","title":"時間軸為什麼要 −dt","ask":"t = −0.002 : dt : 0.002 − dt","pts":["不取終點，讓 N 剛好是偶數（例：fs = 240e3 → N = 960）","N 偶數，下一步 N/2 才是整數，頻率軸才能把 0 Hz 放在正中間","資料點很多時，少一個點對連續訊號沒有差別"]},{"w":"mid","kind":"重點","no":"part 1","title":"頻率軸為什麼要 /2、df = fs/N","ask":"N = length(y);  f = (−N/2:N/2−1)*fs/N;","pts":["t → y → N：N 就是資料點數量（例 960）","(−N/2:N/2−1) 是 −480 … 479 的格點編號，讓圖形對稱且 0 在正中間","每一格乘上 df = fs/N 才變成 Hz","檢查法：f(N/2+1) 必須是 0"]},{"w":"mid","kind":"重點","no":"part 2","title":"zeros 先建矩陣，再填第 1 列","ask":"y_lpf = zeros(length(fs_num)+1, length(t));  y_lpf(1,:) = conv(y, h_lpf, 'same');","pts":["① 建立全零矩陣：6 列 × length(t) 欄","② conv(…,'same') 的結果回傳到第 1 列，其餘列之後在迴圈填","(1,:) 的冒號代表「第 1 列的全部欄」"]},{"w":"mid","kind":"重點","no":"part 3","title":"A./max(A).*max(B) 畫濾波器","ask":"plot(f, abs(fftshift(fft(h_lpf)))./max(abs(fftshift(fft(h_lpf)))) .* max(abs(fftshift(fft(y_sample(i,:))))), 'k')","pts":["先除以自己的最大值 → 最高變 1（正規化）","再乘上訊號頻譜的最大值 → 和訊號一樣高","只為了讓濾波器和訊號疊在同一張圖好比較，不影響計算"]},{"w":"mid","kind":"重點","no":"Nyquist","title":"Nyquist sampling","ask":"原始訊號 → 取樣後 → fs 降低 → fs 再降低（Aliasing）","pts":["取樣後頻譜以 fs 為間隔週期複製","不重疊條件：fs − W > W，即 fs > 2W","fs 再降低 → 複製品重疊 → Aliasing，無法還原"]},{"w":"mid","kind":"重點","no":"AM","title":"AM modulation","ask":"s(t) = Ac·(1 + Ka·m(t))·c(t)","pts":["條件 |Ka·m(t)| < 1，否則過調變","頻譜：fc 載波 + fc ± fm 上下邊帶（Upper / Lower Tone）","載波高度和 Ka 無關，邊帶高度正比於 Ka"]},{"w":"mid","kind":"重點","no":"DSB-SC","title":"DSB-SC (double sideband suppressed carrier)","ask":"s(t) = m(t)·c(t)","pts":["和 AM 比：訊號不包含明顯載波分量","功率都花在帶訊息的邊帶上，較有效率","解調一定要乘上同頻同相的載波（同步解調）"]},{"w":"mid","kind":"重點","no":"額外補充","title":"考試三件事","ask":"① 變數切記不要重複　② 輸出圖片該標的都要標　③ 善用作業和 ctrl+c/v","pts":["第一題座標軸用 t1、第二題用 t2——上方生成器寫「第N題」就會自動加尾碼","每張圖：title、xlabel、ylabel、grid on，多條線加 legend","整份交一個 .m 檔，檔名「學號_test1」"]}]};
+const $ = (id) => document.getElementById(id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+const KW = new Set(['for', 'end', 'if', 'else', 'elseif', 'while', 'function', 'return', 'break', 'continue', 'switch', 'case', 'otherwise']);
+const FX = new Set(['sin', 'cos', 'sinc', 'abs', 'fft', 'fftshift', 'ifft', 'ifftshift', 'conv', 'filter', 'plot', 'stem', 'subplot', 'figure', 'title', 'xlabel', 'ylabel', 'xlim', 'ylim', 'legend', 'grid', 'hold', 'sgtitle', 'zeros', 'ones', 'length', 'size', 'numel', 'max', 'min', 'mean', 'sum', 'round', 'num2str', 'disp', 'fprintf', 'linspace', 'clc', 'clear', 'close', 'sign', 'exp', 'sqrt', 'real', 'imag', 'inv', 'det', 'pi', 'find']);
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function hlLine(line) {
+  let o = '', i = 0;
+  const isId = (c) => /[A-Za-z0-9_]/.test(c);
+  while (i < line.length) {
+    const c = line[i];
+    if (c === '%') { o += '<span class="cm">' + esc(line.slice(i)) + '</span>'; break; }
+    if (c === "'") {
+      const p = line[i - 1] || '';
+      if (p && (isId(p) || p === ')' || p === ']' || p === "'" || p === '.')) { o += c; i++; continue; }
+      let j = i + 1;
+      while (j < line.length) { if (line[j] === "'") { if (line[j + 1] === "'") { j += 2; continue; } break; } j++; }
+      o += '<span class="s">' + esc(line.slice(i, j + 1)) + '</span>'; i = j + 1; continue;
+    }
+    if (/[A-Za-z_]/.test(c)) {
+      let j = i; while (j < line.length && isId(line[j])) j++;
+      const w = line.slice(i, j);
+      o += KW.has(w) ? '<span class="k">' + w + '</span>' : FX.has(w) ? '<span class="fx">' + w + '</span>' : w;
+      i = j; continue;
+    }
+    if (/[0-9]/.test(c) || (c === '.' && /[0-9]/.test(line[i + 1] || ''))) {
+      const m = line.slice(i).match(/^(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/);
+      o += '<span class="n">' + m[0] + '</span>'; i += m[0].length; continue;
+    }
+    o += esc(c); i++;
+  }
+  return o;
+}
+function renderCode(el, code) {
+  el.innerHTML = code.split('\n').map((l) => '<span class="l">' + hlLine(l) + '</span>').join('');
+}
+let toastT;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 1800); }
+async function copyText(text, el) {
+  try { await navigator.clipboard.writeText(text); toast('已複製'); }
+  catch (e) {
+    if (el) { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    toast('已選取，按 Ctrl+C 複製');
+  }
+}
+
+const EXAMPLES = [
+  ['DSB-SC 雙音（W6 作業）', '第2題 DSB-SC 調變與乘法解調器解調，m(t) = 2.8 sin(2π·3×10^3 t) + 1.3 sin(2π·8×10^3 t)，Ac = 2，fc = 100 kHz'],
+  ['AM Ka=0.6 兩種解調', 'AM 調變 Ka = 0.6，m(t) = 2.2sin(2π·4×10^3 t) + 1.8sin(2π·8×10^3 t)，Ac = 2，fc = 100 kHz，同步解調和二極體包絡檢波都做'],
+  ['Nyquist 換參數', 'Nyquist 取樣與重建，原始訊號 sin(2π·3000t)，取樣頻率分別為 2kHz、5kHz、6kHz、10kHz'],
+  ['HPF 兩個 sinc', '用兩個 sinc 設計高通濾波器，保留 90 Hz，建議通帶 80 ~ Hz，x = 1sin(2π10t) + 0.8sin(2π40t) + 0.5sin(2π90t)，頻率範圍 -150 ~ 150 Hz'],
+  ['弦波相減', '時間 -0.02 ~ 0.02 sec，取樣頻率 10 kHz，x1 = 4sin(2π6t)，x2 = 2sin(2π4t)，x3 = 1sin(2π2t)，x_sum = x1 - x2 - x3'],
+  ['整份三題', '第1題 矩陣 A = [1 2 3; 4 5 6]，C = [1 2; 3 4; 5 6]，矩陣乘法與轉置\n第2題 三個弦波 2sin(2π5t) + sin(2π20t) + 0.5sin(2π45t) 相加，時間 -0.5 ~ 0.5 秒，取樣頻率 1 kHz，畫頻譜\n第3題 AM 調變 Ka = 0.3，m(t) = 2sin(2π·5×10^3 t)，fc = 100 kHz，Ac = 1，同步解調'],
+];
+const DEFAULT_CMD = EXAMPLES[0][1];
+
+let lastLocal = '';
+let mode = 'local';
+function runLocal() {
+  const text = $('cmd').value;
+  store.set('cmd', text);
+  const r = MGEN.generate(text);
+  mode = 'local';
+  const det = $('det'), info = $('info');
+  det.innerHTML = ''; info.innerHTML = '';
+  if (!text.trim()) { $('out').innerHTML = '<div class="empty">在左邊輸入題目或指示，程式碼會即時出現在這裡。</div>'; lastLocal = ''; return; }
+  for (const p of r.parts) {
+    const span = document.createElement('span');
+    if (p.ok) {
+      if (p.q) { const q = document.createElement('span'); q.className = 'tag q'; q.textContent = 'Q' + p.q; det.append(q); }
+      span.className = 'tag'; span.textContent = p.name;
+      for (const s of p.info) { const li = document.createElement('li'); li.textContent = (p.q ? 'Q' + p.q + '：' : '') + s; info.append(li); }
+      if (p.q) { const li = document.createElement('li'); li.innerHTML = '<b>Q' + p.q + '</b> 的變數全部加尾碼 ' + p.q + '（t → t' + p.q + '、x1 → x1_' + p.q + '）'; info.append(li); }
+    } else { span.className = 'tag bad'; span.textContent = (p.q ? 'Q' + p.q + ' ' : '') + '看不出題型'; }
+    det.append(span);
+  }
+  lastLocal = r.code;
+  if (r.code) renderCode($('out'), r.code);
+  else $('out').innerHTML = '<div class="empty">看不出題型。試著寫進關鍵字，例如「AM 調變」「DSB-SC」「低通／帶通／高通」「Nyquist 取樣」「矩陣」「conv」「sinc」「弦波」「方波」，或從上方題庫找最接近的題目改。</div>';
+}
+let deb;
+$('cmd').addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(runLocal, 120); });
+const chips = $('chips');
+EXAMPLES.forEach(([lab, txt]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = lab; b.onclick = () => { $('cmd').value = txt; runLocal(); }; chips.append(b); });
+$('cmd').value = store.get('cmd') || DEFAULT_CMD;
+runLocal();
+
+function currentCode() { return mode === 'ai' ? aiCode : lastLocal; }
+$('copyBtn').onclick = () => { const c = currentCode(); if (!c) return toast('沒有程式碼'); copyText(c, $('out')); };
+$('fnameTag').onclick = () => copyText('113102516_test1', $('fnameTag'));
+
+$('saveBtn').onclick = () => {
+  const c = currentCode(); if (!c) return toast('沒有程式碼');
+  let name = ($('fname').value || '113102516_test1.m').trim();
+  if (!/\.m$/i.test(name)) name += '.m';
+  const url = URL.createObjectURL(new Blob([c + '\n'], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('已下載 ' + name);
+};
+
+let aiCode = '';
+const imgs = [];
+const MAX_IMGS = 6;
+function renderThumbs() {
+  const box = $('thumbs'); box.innerHTML = ''; box.hidden = !imgs.length; $('imgRow').hidden = !imgs.length;
+  imgs.forEach((im, i) => {
+    const d = document.createElement('div'); d.className = 'thumb';
+    const img = document.createElement('img'); img.src = im.url; img.alt = '題目截圖 ' + (i + 1);
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', '移除第 ' + (i + 1) + ' 張');
+    x.onclick = () => { imgs.splice(i, 1); renderThumbs(); };
+    d.append(img, x); box.append(d);
+  });
+  $('readBtn').textContent = (gemKey() ? 'Gemini 讀圖生成' : '讀圖生成') + (imgs.length > 1 ? '（' + imgs.length + ' 張）' : '');
+}
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      const sc = Math.min(1, 1800 / Math.max(im.naturalWidth, im.naturalHeight));
+      const w = Math.round(im.naturalWidth * sc), h = Math.round(im.naturalHeight * sc);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+      const sc2 = Math.min(2, 3600 / Math.max(im.naturalWidth, im.naturalHeight));
+      const cv2 = document.createElement('canvas'); cv2.width = Math.round(im.naturalWidth * sc2); cv2.height = Math.round(im.naturalHeight * sc2);
+      const g2 = cv2.getContext('2d'); g2.fillStyle = '#fff'; g2.fillRect(0, 0, cv2.width, cv2.height); g2.imageSmoothingQuality = 'high'; g2.drawImage(im, 0, 0, cv2.width, cv2.height);
+      const px = g2.getImageData(0, 0, cv2.width, cv2.height), d = px.data;
+      let lo = 255, hi = 0;
+      for (let k = 0; k < d.length; k += 4) { const v = 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2]; d[k] = v; if (v < lo) lo = v; if (v > hi) hi = v; }
+      const span = Math.max(1, hi - lo);
+      for (let k = 0; k < d.length; k += 4) { const v = ((d[k] - lo) / span) * 255 > 170 ? 255 : 0; d[k] = d[k + 1] = d[k + 2] = v; d[k + 3] = 255; }
+      g2.putImageData(px, 0, 0);
+      URL.revokeObjectURL(url);
+      const dataUrl = cv.toDataURL('image/jpeg', 0.9);
+      resolve({ url: dataUrl, data: dataUrl.split(',')[1], ocr: cv2 });
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    im.src = url;
+  });
+}
+async function addFiles(files) {
+  const list = [...files].filter((f) => f.type && f.type.startsWith('image/'));
+  if (!list.length) return false;
+  for (const f of list) {
+    if (imgs.length >= MAX_IMGS) { toast('最多 ' + MAX_IMGS + ' 張'); break; }
+    try { imgs.push(await loadImage(f)); } catch (e) { toast('這張圖讀不了'); }
+  }
+  renderThumbs();
+  $('imgStatus').textContent = '按「' + $('readBtn').textContent + '」。';
+  $('drop').scrollIntoView({ block: 'nearest' });
+  return true;
+}
+document.addEventListener('paste', async (e) => {
+  const files = e.clipboardData ? [...e.clipboardData.files] : [];
+  if (files.some((f) => f.type.startsWith('image/'))) { e.preventDefault(); await addFiles(files); toast('已貼上截圖'); }
+});
+$('imgIn').addEventListener('change', async (e) => { await addFiles(e.target.files); e.target.value = ''; });
+const drop = $('drop');
+['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('over')));
+drop.addEventListener('drop', async (e) => { e.preventDefault(); if (e.dataTransfer) await addFiles(e.dataTransfer.files); });
+
+function ocrClean(lines) {
+  const CJK = '\\u3400-\\u9fff\\u3000-\\u303f\\uff00-\\uffef';
+  const out = [];
+  for (let s of lines) {
+    s = s.replace(new RegExp('([' + CJK + '])\\s+(?=[' + CJK + '])', 'g'), '$1');
+    s = s.replace(new RegExp('([' + CJK + '])\\s+(?=[(（:：,，。])', 'g'), '$1').replace(new RegExp('([(（:：,，])\\s+(?=[' + CJK + '])', 'g'), '$1');
+    s = s.replace(/([A-Za-z0-9)\]）])\s*[二三]\s*(?=[-\d.A-Za-z(])/g, '$1 = ');
+    s = s.replace(/\)\s*十\s*/g, ') + ');
+    s = s.replace(/KkHz|Kkhz|kkHz/g, 'kHz').replace(/(\d)\s*[kK]\s*H\s*z/g, '$1 kHz');
+    s = s.replace(/(sin|sim|sln|s1n|cos|c0s|cas)\s*[(|\[{]\s*2\s*(?:7r|7t|7n|[7nrxπ]|pi)?\s*[.·\-*,，]?\s*(\d+(?:\.\d+)?)\s*(?:([x×*X])\s*10\s*(\^?\s*\{?\s*\d\s*\}?|[%°³])?)?\s*([t4]?)\s*[1l]?\s*[)\]|}]/g,
+      (m, fn, F, x, ex, tt) => {
+        let f = F;
+        if (!x && !tt && /\d1$/.test(F) && !/\./.test(F)) f = F.slice(0, -1);
+        let e = '';
+        if (x) { const d = ex && ex.match(/\d/); e = '×10^' + (d ? d[0] : '3'); }
+        return (/^c/.test(fn) ? 'cos' : 'sin') + '(2π·' + f + e + ' t)';
+      });
+    s = s.replace(/(^|[^A-Za-z])f\s*[.,。c]\s*[=二—]\s*/g, '$1fc = ').replace(/(^|[\s。‧•·])生?\s*[二=]\s*(\d+(?:\.\d+)?\s*kHz)/g, '$1fc = $2');
+    s = s.replace(/(^|[^A-Za-z])A\s*[.,。c]\s*(cos|[=二])/g, (m, p, q) => p + (q === 'cos' ? 'Ac cos' : 'Ac ='));
+    s = s.replace(/(^|[\s。‧•·])4\s*[.。,c]?\s*[=二]\s*(\d)/g, '$1Ac = $2');
+    s = s.replace(/\bmit\)/g, 'm(t)').replace(/\b2r\b/g, '2π');
+    s = s.replace(/\s{2,}/g, ' ').trim();
+    if (s) out.push(s);
+  }
+  return out.join('\n');
+}
+let tessP = null, tessWorker = null;
+function loadTess() {
+  if (window.Tesseract) return Promise.resolve();
+  if (!tessP) tessP = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = res; s.onerror = () => { tessP = null; rej(new Error('offline')); }; document.head.append(s); });
+  return tessP;
+}
+async function runOCR(signal) {
+  await loadTess();
+  if (!tessWorker) {
+    $('imgStatus').textContent = '第一次使用：下載文字辨識引擎（約 5 MB，之後會快取）…';
+    tessWorker = await Tesseract.createWorker(['chi_tra', 'eng'], 1, {
+      logger: (m) => { if (m.status && typeof m.progress === 'number') $('imgStatus').textContent = (m.status.includes('recogniz') ? '辨識中' : '載入引擎') + ' ' + Math.round(m.progress * 100) + '%'; },
+    });
+  }
+  const all = [];
+  for (let i = 0; i < imgs.length; i++) {
+    if (signal.aborted) throw new DOMException('aborted', 'AbortError');
+    const { data } = await tessWorker.recognize(imgs[i].ocr, {}, { blocks: true });
+    for (const b of data.blocks || []) for (const p of b.paragraphs) for (const l of p.lines) if (l.confidence >= 40) all.push(l.text.trim());
+  }
+  return ocrClean(all);
+}
+
+const gemKey = () => store.get('gemKey') || '';
+const GEM_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+function gemSetState() { $('gemState').textContent = gemKey() ? '已設定 Gemini：讀圖改用 Gemini' : '未設定：讀圖用內建文字辨識（免費、免設定）'; renderThumbs(); }
+async function gemListModels(key) {
+  const r = await fetch(GEM_BASE + '/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+  if (!r.ok) { let m = 'HTTP ' + r.status; try { const j = await r.json(); m = (j.error && j.error.message) || m; } catch (e) {} const err = new Error(m); err.status = r.status; throw err; }
+  const j = await r.json();
+  const ms = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent')).map((m) => m.name.replace(/^models\//, ''))
+    .filter((n) => /^gemini/.test(n) && !/(tts|image|live|embedding|audio|transcribe|robotics|computer|aqa)/i.test(n));
+  const score = (n) => (/flash/.test(n) ? 0 : 10) + (/lite/.test(n) ? 3 : 0) + (/preview|exp/.test(n) ? 2 : 0) - (parseFloat((n.match(/gemini-(\d+(?:\.\d+)?)/) || [0, 0])[1]) || 0) / 100;
+  return ms.sort((a, b) => score(a) - score(b));
+}
+function fillModels(list) {
+  const sel = $('gemModel'); sel.innerHTML = '';
+  list.forEach((n) => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.append(o); });
+  const saved = store.get('gemModel'); if (saved && list.includes(saved)) sel.value = saved;
+  store.set('gemModel', sel.value); store.set('gemModels', JSON.stringify(list));
+}
+try { const l = JSON.parse(store.get('gemModels') || '[]'); if (l.length) fillModels(l); } catch (e) {}
+$('gemKey').value = gemKey();
+$('gemBtn').onclick = () => { const b = $('gemBox'); b.hidden = !b.hidden; $('gemBtn').setAttribute('aria-expanded', String(!b.hidden)); };
+$('gemModel').onchange = () => store.set('gemModel', $('gemModel').value);
+$('gemSave').onclick = async () => {
+  const k = $('gemKey').value.trim(); if (!k) return toast('先貼上 Key');
+  $('gemState').textContent = '檢查 Key 中…';
+  try { const list = await gemListModels(k); if (!list.length) throw new Error('這個 Key 沒有可用的 Gemini 模型'); store.set('gemKey', k); fillModels(list); toast('Key 可用，已儲存'); $('gemBox').hidden = true; gemSetState(); }
+  catch (e) { $('gemState').textContent = e instanceof TypeError ? '連不到 Google（離線？）' : (e.status === 400 || e.status === 403 ? 'Key 無效：' : '檢查失敗：') + (e.message || ''); }
+};
+$('gemClear').onclick = () => { try { localStorage.removeItem('gemKey'); } catch (e) {} $('gemKey').value = ''; gemSetState(); toast('已清除'); };
+gemSetState();
+
+const RULES = `你是 CO3001 通訊工程 MATLAB 實驗課的程式產生器。只輸出可直接貼進 MATLAB 執行的純程式碼：不要任何說明文字、不要 % 註解、不要 Markdown 圍欄。
+課程慣例（務必遵守）：
+- 時間向量：fs = ...; dt = 1/fs; t = t0 : dt : t1-dt;（不取終點，N 為偶數）
+- 頻率軸：N = length(t); f = (-N/2:N/2-1)*fs/N; 頻譜 abs(fftshift(fft(x)))
+- 濾波一律 conv(x, h, 'same')。LPF h = B*sinc(B*t)/fs（B 為 rect 總寬 = 2×截止）；BPF (B_out*sinc(B_out*t) - B_in*sinc(B_in*t))/fs；HPF sinc(fs*t) - B_cut*sinc(B_cut*t)/fs
+- 調變：mt 為訊息，ct = Ac*cos(2*pi*fc*t)；AM st = Ac*(1 + Ka*mt).*ct；DSB-SC st = mt.*ct；同步解調 et = st.*ct; lpf = sinc(2.5*fm*t)/N*(2.5*fm)/2; yt = conv(et, lpf, 'same')；AM 解調後 yt = yt - mean(yt)
+- 包絡檢波：x_rect = abs(st)，for 迴圈峰值追蹤，alpha = 0.95
+- Nyquist：fs = 240e3 模擬連續，fs_num 向量，n = round(fs/fs_num(i)); idx = 1:n:length(t); y_sample(i, idx) = y(idx); stem(..., 'filled')
+- 每張子圖都要 title、xlabel、ylabel、grid on；多條線加 legend；時域 'b'、頻域 'r'、濾波器 'k'，'LineWidth', 1；多張用 subplot，最後 sgtitle（英文）
+- 迴圈變數用 i 或 k，複數用 j
+- 指示中若有「第N題」，該題所有變數名加題號尾碼（t → tN，x1 → x1_N），只在最前面放一次 clc; clear; close all;
+截圖是 MATLAB 考題／作業題目（可能含公式、參數、要求畫出的圖清單、subplot 配置、顏色、範例結果圖）。
+請先完整讀懂截圖中所有題目要求與數值（含公式中的振幅、頻率、10 的次方、時間範圍、取樣頻率、Ka、Ac、fc、截止頻率、頻率範圍），不要遺漏任何一張要畫的圖。
+若截圖附有結果圖，讓圖的版面、標題、軸範圍盡量與它一致。若有多題，依截圖上的題號套用「第N題」規則。`;
+function cleanAI(t) {
+  t = t.replace(/^[\s\S]*?```(?:matlab|m|octave)?\s*\n/i, (m) => (/```/.test(m) ? '' : m)).replace(/\n```[\s\S]*$/, '');
+  return t.split('\n').filter((l) => !/^\s*%/.test(l)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+async function runGemini(signal, extra, onText) {
+  const model = $('gemModel').value || store.get('gemModel');
+  if (!model) throw new Error('沒有可用的模型，請重新儲存 Key');
+  const parts = imgs.map((im) => ({ inline_data: { mime_type: 'image/jpeg', data: im.data } }));
+  parts.push({ text: RULES + (extra ? '\n\n使用者補充指示（優先遵守）：\n' + extra : '') + '\n\n現在只輸出 MATLAB 程式碼。' });
+  const r = await fetch(GEM_BASE + '/models/' + encodeURIComponent(model) + ':streamGenerateContent?alt=sse', {
+    method: 'POST', signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': gemKey() },
+    body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { maxOutputTokens: 16384, temperature: 0.2 } }),
+  });
+  if (!r.ok) { let m = 'HTTP ' + r.status; try { const j = await r.json(); m = (j.error && j.error.message) || m; } catch (e) {} const err = new Error(m); err.status = r.status; throw err; }
+  const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '', text = '';
+  for (;;) {
+    const { value, done } = await reader.read(); if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let k;
+    while ((k = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, k).trim(); buf = buf.slice(k + 1);
+      if (!line.startsWith('data:')) continue;
+      let ev; try { ev = JSON.parse(line.slice(5)); } catch (e) { continue; }
+      const ps = ev.candidates && ev.candidates[0] && ev.candidates[0].content && ev.candidates[0].content.parts;
+      if (ps) for (const p of ps) if (p.text && !p.thought) { text += p.text; onText(text); }
+    }
+  }
+  return text;
+}
+let readCtl = null;
+async function doOCR() {
+  $('imgStatus').textContent = '辨識中…';
+  const txt = await runOCR(readCtl.signal);
+  if (!txt.trim()) { $('imgStatus').textContent = '圖片裡沒讀到文字，換一張清楚一點的截圖試試。'; return; }
+  $('cmd').value = txt; runLocal();
+  const ok = lastLocal !== '';
+  $('imgStatus').textContent = ok ? '已辨識並生成。辨識結果已填進上面的框，請對一下公式裡的數字，有錯直接改，程式碼會跟著更新。' : '已把辨識文字填進上面的框，但看不出題型；補上關鍵字（例如 DSB-SC、低通、AM）就會出程式碼。';
+  $('cmd').focus();
+}
+$('readBtn').onclick = async () => {
+  if (!imgs.length) return;
+  clearTimeout(deb);
+  readCtl = new AbortController();
+  $('readBtn').disabled = true; $('readStop').hidden = false;
+  try {
+    if (gemKey()) {
+      $('imgStatus').textContent = 'Gemini 讀題中…';
+      const extra = $('cmd').value.trim() && !EXAMPLES.some(([, t]) => t === $('cmd').value) ? $('cmd').value.trim() : '';
+      let started = false;
+      try {
+        await runGemini(readCtl.signal, extra, (t) => {
+          if (!started) { started = true; mode = 'ai'; $('det').innerHTML = '<span class="tag src">Gemini 讀圖生成</span>'; $('info').innerHTML = '<li>改左邊的字會切回即時規則生成</li>'; }
+          aiCode = cleanAI(t); renderCode($('out'), aiCode); $('imgStatus').textContent = 'Gemini 撰寫中…';
+        });
+        $('imgStatus').textContent = started ? '完成。建議在 MATLAB 跑一次確認。' : 'Gemini 沒有回傳內容，改用內建文字辨識…';
+        if (!started) await doOCR();
+      } catch (e) {
+        if (e.name === 'AbortError') throw e;
+        const why = e instanceof TypeError ? '連不到 Gemini' : e.status === 429 ? 'Gemini 免費額度暫時用完' : e.status === 400 || e.status === 403 ? 'Gemini Key 或模型有問題' : 'Gemini 發生錯誤';
+        toast(why + '，改用內建文字辨識');
+        await doOCR();
+      }
+    } else {
+      await doOCR();
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') $('imgStatus').textContent = '已停止。';
+    else if (e.message === 'offline') $('imgStatus').textContent = '讀圖需要網路（第一次要下載辨識引擎）。離線時請照圖把關鍵字和數字打進上面的框。';
+    else $('imgStatus').textContent = '讀圖失敗：' + (e.message || e);
+  } finally {
+    $('readBtn').disabled = false; $('readStop').hidden = true;
+  }
+};
+$('readStop').onclick = () => readCtl?.abort();
+
+let week = store.get('week') || 'all';
+const seg = $('seg');
+[['all', '全部']].concat(LIB.weeks.map((w) => [w.id, w.tag])).forEach(([id, lab]) => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = lab; b.dataset.id = id;
+  b.onclick = () => { week = id; store.set('week', id); renderLib(); }; seg.append(b);
+});
+$('q').addEventListener('input', () => renderLib());
+
+function stripHead(code) { return code.replace(/^clc; clear; close all;\s*\n+/, ''); }
+function withQ(code, qv) {
+  const n = parseInt(qv, 10);
+  if (!n || n < 1) return code;
+  const body = MGEN.renameVars(stripHead(code), n);
+  return n === 1 ? 'clc; clear; close all;\n\n' + body : body;
+}
+function renderLib() {
+  [...seg.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === week)));
+  const q = $('q').value.trim().toLowerCase();
+  const root = $('lib'); root.innerHTML = '';
+  let shown = 0;
+  for (const w of LIB.weeks) {
+    if (week !== 'all' && week !== w.id) continue;
+    const items = LIB.items.filter((it) => it.w === w.id && (!q || [it.title, it.ask, it.no, it.kind, ...(it.pts || []), it.code || ''].join(' ').toLowerCase().includes(q)));
+    if (!items.length) continue;
+    shown += items.length;
+    const sec = document.createElement('div'); sec.className = 'week';
+    sec.innerHTML = '<div class="week-h"><span class="wt">' + w.tag + '</span><h3>' + esc(w.name) + '</h3><span class="d">' + w.date + '</span></div>';
+    const cards = document.createElement('div'); cards.className = 'cards';
+    for (const it of items) {
+      const c = document.createElement('article');
+      c.className = 'card' + (it.kind === '作業' ? ' hw' : it.kind === '重點' ? ' mid' : '');
+      c.innerHTML = '<div class="meta"><span class="tag">' + esc(it.no) + '</span><span class="kd' + (it.kind === '作業' ? ' hw' : '') + '">' + esc(it.kind) + '</span></div>' +
+        '<h4>' + esc(it.title) + '</h4><p class="ask">' + esc(it.ask) + '</p><ul>' + it.pts.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>';
+      if (it.code) {
+        const lines = it.code.split('\n').length;
+        const d = document.createElement('details');
+        d.innerHTML = '<summary>顯示程式碼（' + lines + ' 行）</summary>';
+        const pre = document.createElement('pre'); pre.className = 'code'; renderCode(pre, it.code); d.append(pre);
+        c.append(d);
+        const act = document.createElement('div'); act.className = 'card-act';
+        const qn = document.createElement('input'); qn.className = 'qn'; qn.type = 'number'; qn.min = '1'; qn.placeholder = '題號'; qn.setAttribute('aria-label', '當作第幾題（加變數尾碼）');
+        const cp = document.createElement('button'); cp.className = 'btn'; cp.type = 'button'; cp.textContent = '複製';
+        cp.onclick = () => copyText(withQ(it.code, qn.value), pre);
+        const ld = document.createElement('button'); ld.className = 'btn'; ld.type = 'button'; ld.textContent = '放到輸出區';
+        ld.onclick = () => { aiCode = withQ(it.code, qn.value); mode = 'ai'; renderCode($('out'), aiCode); $('det').innerHTML = '<span class="tag src">題庫 ' + w.tag + ' ' + esc(it.no) + '</span>' + (qn.value ? '<span class="tag q">Q' + parseInt(qn.value, 10) + '</span>' : ''); $('info').innerHTML = '<li>' + esc(it.title) + (qn.value ? '，變數已加尾碼 ' + parseInt(qn.value, 10) : '') + '</li>'; $('genH').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+        act.append(qn, cp, ld); c.append(act);
+      }
+      cards.append(c);
+    }
+    sec.append(cards); root.append(sec);
+  }
+  if (!shown) root.innerHTML = '<p class="nores">沒有符合「' + esc(q) + '」的題目。</p>';
+}
+renderLib();
+
+const DECKS = [{"id":"w2","tag":"W2","name":"實驗一 MATLAB 基礎練習","kind":"missing","want":"Week2_CO3001_MatlabBasic.pptx","slides":[{"h":"實驗一　MATLAB 基礎練習","b":["日期：9/15　週數：第二週"]},{"h":"目錄","b":["一、矩陣運算、轉置與共軛轉置","二、時間向量與多個弦波","三、利用 sin(x)/x 製造多個 sinc 波","四、將 sinc 波做傅立葉轉換 (FFT)","五、conv、conv(...,'same') 與 filter","六、回家作業練習"]},{"h":"實驗例行動作","b":["實驗一開始請養成習慣輸入","clc：清除 command window，讓螢幕變乾淨","clear：清除 workspace，並釋放記憶體","close all：關閉所有打開的圖形視窗 (figure windows)"]},{"h":"第一題　矩陣運算、轉置與共軛轉置","b":["建立矩陣：以空白鍵或 , 隔開元素，並以分號切換到下一列"]},{"h":"第一題　建立複數矩陣","b":["當有複數 ( i ) 時，在 MATLAB 中以 j 代替"]},{"h":"第一題　運算","b":["+ 加法運算　- 減法運算","* 乘法運算（列 × 行）","/ 除法運算",".* 逐個元素相乘（矩陣大小必須相同）"]},{"h":"第一題　轉置與共軛","b":["轉置矩陣：列和行交換","共軛矩陣：列和行交換，數值虛部正負號相反"]},{"h":"第二題　時間向量與多個弦波","b":["時間 (t)：-0.2 ~ 0.2 sec　取樣頻率 (fs)：100 kHz","建立時間向量，產生三個弦波，畫出單獨波形與相加後波形。","建立時間向量 (t)，訊號的時間軸（起點 : 間隔 : 終點）","流程：建立 fs → 建立 t → 建立弦波 → 畫圖"]},{"h":"第二題　建立圖形","b":["完整的圖形須包含：","(1) X 軸標題　(2) Y 軸標題","(3) 圖示　(4) 圖標題","(5) 格線"]},{"h":"第二題　建立並列圖形","b":["subplot(m,n,k)：建立一個 m 列 n 行的圖形，k 表示第幾張圖","subplot(2,1,1)　subplot(2,1,2)","sgtitle('…')：建立一個大標題"]},{"h":"第三題　sinc 波","b":["時間 (t)：-20 ~ 20 sec　取樣頻率 (fs)：100 kHz","if x = 0 則另外處理","zeros(m,n)：建立一個大小為 m*n 的零矩陣","length(n)：設定陣列的長度"]},{"h":"第四題　將 sinc 波做傅立葉轉換 (FFT)","b":["將上一題三組 sinc 波形做 fft，並利用 fftshift 以及 abs 觀察頻譜大小。","頻率範圍：-0.5 ~ 0.5 Hz（投影片原文寫 0.5~0.5 Hz）","fft(…)：計算離散傅立葉轉換 (DFT)","fftshift(…)：把零頻分量移到頻譜中心，重新排列傅立葉轉換","abs(…)：取絕對值得到大小","xlim([…])：限制 x 軸範圍"]},{"h":"第五題　conv、conv(...,'same') 與 filter","b":["用小向量觀察 conv、conv(...,'same') 與 filter 的差異。","conv(a,h)：做卷積運算","conv(a,h,'same')：做卷積運算，並取與輸入長度相同的中心段","filter(h,1,a)：以濾波器逐點運算，輸出長度與 a 相同（1 為反饋係數，通常為 1）"]},{"h":"回家作業","b":["1. 請說明矩陣運算中「.*」與「*」的差異為何？","2. 建立時間向量，產生三個弦波，畫出相減後之波形。","時間：-0.02 ~ 0.02 sec　取樣頻率：10 kHz","弦波1：x1 = 4*sin(2π6t)　弦波2：x2 = 2*sin(2π4t)　弦波3：x3 = 1*sin(2π2t)","弦波4：x_sum = x1 - x2 - x3"]}]},{"id":"w3","tag":"W3","name":"實驗二 濾波器設計與頻譜","kind":"pdf","file":"實驗二.pdf","src":"files/W3_%E5%AF%A6%E9%A9%97%E4%BA%8C_filter%E8%A8%AD%E8%A8%88%E8%88%87%E9%A0%BB%E8%AD%9C.pdf"},{"id":"w4","tag":"W4","name":"實驗三 Nyquist 取樣","kind":"pdf","file":"第4週 實驗3 Nyquist取樣.pdf","src":"files/W4_%E5%AF%A6%E9%A9%97%E4%B8%89_Nyquist%E5%8F%96%E6%A8%A3.pdf"},{"id":"w5","tag":"W5","name":"實驗四 AM 調變與解調","kind":"missing","want":"AM_mod_demod.pptx","slides":[{"h":"實驗四　AM 調變與解調","b":["日期：10/6　週數：第 5 週","調變原理・失真的關鍵・程式拆解","s(t) = Ac[1 + Ka·m(t)]·c(t)"]},{"h":"目錄","b":["介紹 AM 調變","AM 調變實作","AM 解調實作","包絡檢測","回家作業練習"]},{"h":"什麼是 AM 調變？","b":["振幅調變 (Amplitude Modulation, AM)，把原本低頻、不能有效遠距離傳輸的訊息，放到高頻載波上，利用「載波的振幅大小」來攜帶訊息。","為什麼要搬到高頻？","高頻段能提供更大的頻寬與傳輸容量","提升抗干擾能力","天線尺寸限制"]},{"h":"AM 調變／解調示意圖","b":["m(t) → Modulation → s(t) → Demodulation → e(t) → LPF → y(t)"]},{"h":"AM 調變基本公式","b":["s(t) = Ac·[1 + Ka·m(t)]·c(t)"]},{"h":"AM 調變在做什麼？","b":["載波的振幅跟隨訊號 m(t) 改變","包絡線 (envelope)：攜帶原本的訊息","高頻載波"]},{"h":"《複習》cos 與 sin 的傅立葉轉換","b":["cos(2πf₀t) ↔ ½[δ(f − f₀) + δ(f + f₀)]","sin(2πf₀t) ↔ (1/2j)[δ(f − f₀) − δ(f + f₀)]"]},{"h":"AM 調變過程","b":["時域相乘 = 頻域搬移：訊息頻譜被搬到 ±fc"]},{"h":"頻譜：訊息被搬到載波兩側","b":["載波 fc：±100 kHz 最高峰，本身不帶訊息。","邊帶 (sidebands)：fc ± fm"]},{"h":"第一題　AM 調變（不失真）","b":["程式結構：初始化 → 建立 fs & t → 建立 m(t) & c(t) → AM 調變 → 建立頻域軸 → 畫圖"]},{"h":"第一題　AM 調變（不失真）","b":["plot(t, mt, 'b', 'LineWidth', 1);　（x 軸, y 軸, '顏色', 'LineWidth', 線寬）","常用顏色：'b' 時域訊號（藍）、'r' 頻域訊號（紅）、'k' 濾波訊號（黑）","請試著自己畫出 s(t) 與 |S(f)|","做傅立葉轉換；限制 x 軸範圍，方便與調變後的訊號做比較（訊號搬移至高頻）"]},{"h":"調變有什麼限制？","b":["訊息失真與否，只看一個條件：|Ka·m(t)| < 1","相乘如果出現大於 1 的負數（ex: -1.2），相位翻轉了 180°","包絡反折：外殼不再等於訊息"]},{"h":"AM 解調基本公式","b":["e(t) = s(t)·c(t)，再經過 LPF 取出 m(t)"]},{"h":"AM 解調過程","b":["e(t) = Ac²[1 + Ka·m(t)]cos²(2πfc t) = ½Ac²[1 + Ka·m(t)][1 + cos(4πfc t)]","低頻部分含 m(t)，2fc 部分由 LPF 濾掉"]},{"h":"第二題　AM 調變與乘法解調器解調（不失真）","b":["e(t) = s(t)·c(t) → LPF → y(t)"]},{"h":"第二題　AM 調變與乘法解調器解調（不失真）","b":["調整濾波器的大小，方便觀看"]},{"h":"《示範題》AM 調變與二極體解調器解調","b":["用來存放要比較的值","半波整流（二極體）（註：abs(st) 實為全波整流）"]},{"h":"《示範題》充電與放電","b":["x_rect(i) ≥ yt_envo(i-1)：充電，輸出 = x_rect(i)","x_rect(i) < yt_envo(i-1)：放電，輸出 = alpha × yt_envo(i-1)"]},{"h":"《示範題》包絡檢測器電路圖","b":["二極體（半波整流）","電容（充／放電）","電阻 R"]},{"h":"回家作業","b":["1. Ka 改為 0.6，附 s(t) 與 S(f) 截圖並與 Ka = 0.2 比較，說明原因","2. 承上 Ka = 0.6，同步解調是否可成功還原？二極體解調器是否可以？"]}]},{"id":"w6","tag":"W6","name":"實驗五 DSB-SC 調變與解調","kind":"pdf","file":"第六週DSB 調變與解調.pdf","src":"files/W6_%E5%AF%A6%E9%A9%97%E4%BA%94_DSB%E8%AA%BF%E8%AE%8A%E8%88%87%E8%A7%A3%E8%AA%BF.pdf"},{"id":"mid","tag":"期中","name":"速通期中考","kind":"imgs","srcs":["slides/mid-01.png","slides/mid-02.png","slides/mid-03.png","slides/mid-04.png","slides/mid-05.png","slides/mid-06.png","slides/mid-07.png","slides/mid-08.png","slides/mid-09.png","slides/mid-10.png","slides/mid-11.png"],"pdf":"files/%E9%80%9F%E9%80%9A%E6%9C%9F%E4%B8%AD%E8%80%83.pdf","caps":["封面","注意事項：考試時間、範圍、規則","觀念釐清 part 1：時域與頻域座標軸","時間軸為什麼要 −dt","頻率軸為什麼要 /2、df = fs/N","觀念釐清 part 2：zeros 矩陣與 conv 回傳","觀念釐清 part 3：A./max(A).*max(B)","重點整理：Nyquist sampling","重點整理：AM modulation","重點整理：DSB-SC","額外補充"]}];
+let deckId = store.get('deck') || DECKS[0].id;
+if (!DECKS.some((d) => d.id === deckId)) deckId = DECKS[0].id;
+const deckTabs = $('deckTabs');
+DECKS.forEach((d) => {
+  const b = document.createElement('button'); b.type = 'button'; b.dataset.id = d.id;
+  b.innerHTML = '<b>' + d.tag + '</b>' + esc(d.name);
+  b.onclick = () => { deckId = d.id; store.set('deck', d.id); renderDeck(); };
+  deckTabs.append(b);
+});
+function renderDeck() {
+  [...deckTabs.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === deckId)));
+  const d = DECKS.find((x) => x.id === deckId); const v = $('viewer'); v.innerHTML = '';
+  const bar = document.createElement('div'); bar.className = 'vbar';
+  if (d.kind === 'pdf') {
+    bar.innerHTML = '<span class="cnt">' + esc(d.file) + '</span><a class="btn" href="' + d.src + '" target="_blank" rel="noopener">在新分頁開啟／下載</a>';
+    const f = document.createElement('iframe'); f.className = 'pdfview'; f.src = d.src + '#view=FitH'; f.title = d.name;
+    v.append(bar, f);
+  } else if (d.kind === 'imgs') {
+    bar.innerHTML = '<span class="cnt">' + d.srcs.length + ' 張原始截圖 · 點圖放大</span>' + (d.pdf ? '<a class="btn" href="' + d.pdf + '" target="_blank" rel="noopener">整份 PDF</a>' : '');
+    v.append(bar);
+    const g = document.createElement('div'); g.className = 'shots';
+    d.srcs.forEach((src, i) => {
+      const fig = document.createElement('figure');
+      const im = document.createElement('img'); im.src = src; im.loading = 'lazy'; im.alt = d.name + ' 第 ' + (i + 1) + ' 張';
+      im.onclick = () => openZoom(src);
+      const cap = document.createElement('figcaption'); cap.textContent = (i + 1) + '. ' + (d.caps[i] || '');
+      fig.append(im, cap); g.append(fig);
+    });
+    v.append(g);
+  } else {
+    const note = document.createElement('div'); note.className = 'missing';
+    note.innerHTML = '<b>這份的原始投影片檔沒有收到</b>（當初只上傳到 Project 的文字內容）。把 <span class="mono">' + esc(d.want) + '</span> 傳給我就會換成原檔。下面先放投影片上的文字。';
+    v.append(note);
+    const ol = document.createElement('ol'); ol.className = 'tlist';
+    d.slides.forEach((sl) => { const li = document.createElement('li'); li.innerHTML = '<b>' + esc(sl.h) + '</b><ul>' + sl.b.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>'; ol.append(li); });
+    v.append(ol);
+  }
+}
+function openZoom(src) {
+  const z = document.createElement('div'); z.className = 'zoom'; z.setAttribute('role', 'dialog'); z.setAttribute('aria-label', '放大圖片');
+  const im = document.createElement('img'); im.src = src; im.alt = '';
+  const x = document.createElement('button'); x.className = 'btn zx'; x.type = 'button'; x.textContent = '關閉 Esc';
+  z.append(im, x); z.onclick = () => z.remove(); document.body.append(z);
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const z = document.querySelector('.zoom'); if (z) z.remove(); } });
+renderDeck();
+
+const FILES = [{"tag":"W2","name":"實驗一 MATLAB 基礎練習","files":[{"ext":"pdf","label":"實驗一 回家作業結報（你交的版本）","href":"files/W2_%E5%AF%A6%E9%A9%97%E4%B8%80_%E5%9B%9E%E5%AE%B6%E4%BD%9C%E6%A5%AD%E7%B5%90%E5%A0%B1.pdf","size":"210 KB"},{"ext":"m","label":"第一題 矩陣運算、轉置與共軛轉置（W2_Q1.m）","href":"code/W2_Q1.m"},{"ext":"m","label":"第二題 時間向量與多個弦波（W2_Q2.m）","href":"code/W2_Q2.m"},{"ext":"m","label":"第三題 用 sin(x)/x 製造 sinc 波（W2_Q3.m）","href":"code/W2_Q3.m"},{"ext":"m","label":"第四題 將 sinc 波做 FFT（W2_Q4.m）","href":"code/W2_Q4.m"},{"ext":"m","label":"第五題 conv、conv(…,'same') 與 filter（W2_Q5.m）","href":"code/W2_Q5.m"},{"ext":"m","label":"作業一 .* 與 * 的差異（W2_HW1.m）","href":"code/W2_HW1.m"},{"ext":"m","label":"作業二 三個弦波相減（W2_HW2.m）","href":"code/W2_HW2.m"}]},{"tag":"W3","name":"實驗二 濾波器設計與頻譜","files":[{"ext":"pdf","label":"實驗二 講義","href":"files/W3_%E5%AF%A6%E9%A9%97%E4%BA%8C_filter%E8%A8%AD%E8%A8%88%E8%88%87%E9%A0%BB%E8%AD%9C.pdf","size":"4.0 MB"},{"ext":"m","label":"實驗一 三個弦波疊加與頻譜複習（W3_Q1.m）","href":"code/W3_Q1.m"},{"ext":"m","label":"實驗二 一個 sinc 設計 LPF（W3_Q2.m）","href":"code/W3_Q2.m"},{"ext":"m","label":"實驗三 兩個 sinc 設計 BPF（W3_Q3.m）","href":"code/W3_Q3.m"},{"ext":"m","label":"回家作業 兩個 sinc 設計 HPF（W3_HW.m）","href":"code/W3_HW.m"}]},{"tag":"W4","name":"實驗三 Nyquist 取樣","files":[{"ext":"pdf","label":"實驗三 Nyquist 取樣 講義","href":"files/W4_%E5%AF%A6%E9%A9%97%E4%B8%89_Nyquist%E5%8F%96%E6%A8%A3.pdf","size":"729 KB"},{"ext":"m","label":"第1題 固定單一弦波的 Nyquist 取樣與重建（W4_Q1.m）","href":"code/W4_Q1.m"}]},{"tag":"W5","name":"實驗四 AM 調變與解調","files":[{"ext":"m","label":"第一題 AM 調變（不失真，Ka = 0.2）（W5_Q1.m）","href":"code/W5_Q1.m"},{"ext":"m","label":"第二題 AM 調變＋乘法（同步）解調（W5_Q2.m）","href":"code/W5_Q2.m"},{"ext":"m","label":"示範題 二極體（包絡）解調器（W5_DEMO.m）","href":"code/W5_DEMO.m"},{"ext":"m","label":"作業一 Ka 改為 0.6 的調變比較（W5_HW1.m）","href":"code/W5_HW1.m"},{"ext":"m","label":"作業二 Ka = 0.6 同步解調 vs 二極體解調（W5_HW2.m）","href":"code/W5_HW2.m"}]},{"tag":"W6","name":"實驗五 DSB-SC 調變與解調","files":[{"ext":"pdf","label":"實驗五 DSB 調變與解調 講義","href":"files/W6_%E5%AF%A6%E9%A9%97%E4%BA%94_DSB%E8%AA%BF%E8%AE%8A%E8%88%87%E8%A7%A3%E8%AA%BF.pdf","size":"3.2 MB"},{"ext":"m","label":"第1題 DSB-SC 調變與乘法解調（單音）（W6_Q1.m）","href":"code/W6_Q1.m"},{"ext":"m","label":"第2題 DSB-SC 調變與乘法解調（雙音）（W6_HW.m）","href":"code/W6_HW.m"}]},{"tag":"期中","name":"速通期中考重點","files":[{"ext":"pdf","label":"速通期中考 投影片","href":"files/%E9%80%9F%E9%80%9A%E6%9C%9F%E4%B8%AD%E8%80%83.pdf","size":"565 KB"}]}];
+(function renderFiles() {
+  const root = $('files');
+  for (const g of FILES) {
+    const row = document.createElement('div'); row.className = 'fweek';
+    row.innerHTML = '<div class="wh"><span>' + g.tag + '</span>' + esc(g.name) + '</div>';
+    const list = document.createElement('div'); list.className = 'flist';
+    for (const f of g.files) {
+      const a = document.createElement('a'); a.className = 'file' + (f.ext === 'pdf' ? ' pdf' : ''); a.href = f.href;
+      if (f.ext === 'pdf') { a.target = '_blank'; a.rel = 'noopener'; } else a.setAttribute('download', f.href.split('/').pop());
+      a.innerHTML = '<span class="ext">' + f.ext.toUpperCase() + '</span>' + esc(f.label) + (f.size ? '<span class="sz">' + f.size + '</span>' : '');
+      list.append(a);
+    }
+    row.append(list); root.append(row);
+  }
+})();
+</script>
+</body>
+</html>
