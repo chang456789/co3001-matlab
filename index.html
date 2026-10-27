@@ -322,7 +322,7 @@ const MGEN = (() => {
   }
 
   function findQn(seg) {
-    const m = seg.match(/第\s*([0-9]+|[一二三四五六七八九十]+)\s*題/) || seg.match(/(?:^|[^A-Za-z])Q\s*([0-9]+)/) || seg.match(/題號\s*[:=]?\s*([0-9]+)/);
+    const m = seg.match(/(?:^|\n)[ \t]*第\s*([0-9]+|[一二三四五六七八九十]+)\s*題/) || seg.match(/第\s*([0-9]+|[一二三四五六七八九十]+)\s*題/) || seg.match(/(?:^|[^A-Za-z])Q\s*([0-9]+)/) || seg.match(/題號\s*[:=]?\s*([0-9]+)/);
     if (!m) return null;
     const s = m[1];
     if (/^\d+$/.test(s)) return parseInt(s, 10);
@@ -332,20 +332,20 @@ const MGEN = (() => {
   }
 
   function splitQuestions(text) {
-    const re = /第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/g;
+    const re = /(?:^|\n)[ \t]*第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/g;
     const idx = [];
     let m;
-    while ((m = re.exec(text))) idx.push(m.index);
+    while ((m = re.exec(text))) idx.push(m.index + (m[0].startsWith('\n') ? 1 : 0));
     if (idx.length <= 1) return [text];
     const segs = [];
     if (text.slice(0, idx[0]).trim()) segs.push(text.slice(0, idx[0]));
     for (let i = 0; i < idx.length; i++) segs.push(text.slice(idx[i], idx[i + 1]));
     const out = [];
     for (const s of segs) {
-      if (!out.length || /第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/.test(s)) out.push(s);
+      if (!out.length || /^[ \t]*第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/.test(s)) out.push(s);
       else out[out.length - 1] += s;
     }
-    if (out.length > 1 && !/第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/.test(out[0])) { out[1] = out[0] + out[1]; out.shift(); }
+    if (out.length > 1 && !/^[ \t]*第\s*(?:[0-9]+|[一二三四五六七八九十]+)\s*題/.test(out[0])) { out[1] = out[0] + out[1]; out.shift(); }
     return out;
   }
 
@@ -373,8 +373,7 @@ const MGEN = (() => {
     if (m) P.Ka = parseFloat(m[1]);
     m = take(new RegExp(String.raw`(?:\balpha|α|放電係數)\s*(?:改為|設為|為|是|=|:)?\s*(${NUM})`, 'i'));
     if (m) P.alpha = parseFloat(m[1]);
-    m = take(new RegExp(String.raw`(?:\bf_?0|弦波頻率|訊號頻率|原始頻率)\s*(?:為|是|=|:|設為)?\s*(${NUM})${POW}${UNIT}`, 'i'));
-    if (m) P.f0 = val(m[1], m[2], m[3]);
+    for (const x of w.matchAll(new RegExp(String.raw`(?:\bf_?0|弦波頻率|訊號頻率|原始頻率)\s*(?:為|是|=|:|設為)\s*(${NUM})${POW}${UNIT}`, 'gi'))) { const v = val(x[1], x[2], x[3]); if (v > 0) { P.f0 = v; w = w.replace(x[0], ' \u0000 '); break; } }
 
     m = take(new RegExp(String.raw`(?:頻率範圍|頻域範圍|頻譜範圍|\bf\s*:)\s*(?:可設為|可設|設為|為|是|=|:)?\s*(${NUM})${POW}${UNIT}\s*(?:~|到|至)\s*(${NUM})${POW}${UNIT}`, 'i'));
     if (m) P.frange = [val(m[1], m[2], m[3]), val(m[4], m[5], m[6])];
@@ -630,8 +629,8 @@ const MGEN = (() => {
     else if (P.tones.length > 1) { expr = toneExpr(P.tones); f0 = f0 || Math.max(...P.tones.map(t => t.F)); A = maxAbs(P.tones); }
     if (!f0) { f0 = 2e3; info.push('f0 未指定 → 2e3（實驗三）'); }
     if (/cos/i.test(P.s) && !P.tones.length) fn = 'cos';
-    const fs = P.fs || 240e3;
-    if (!P.fs) info.push('模擬連續的高取樣率 fs → 240e3');
+    const fs = P.fs || (P.fc && P.fc > 2 * Math.max(...(P.fsList || [8e3]))) ? (P.fs || P.fc) : 240e3;
+    if (!P.fs && !P.fc) info.push('模擬連續的高取樣率 fs → 240e3');
     const tr = P.trange || [-0.002, 0.002];
     const list = P.fsList || [1e3, 3e3, 4e3, 5e3, 8e3];
     if (!P.fsList) info.push('fs_num 未指定 → [1e3 3e3 4e3 5e3 8e3]');
@@ -1071,8 +1070,10 @@ function ocrClean(lines) {
     s = s.replace(/\)\s*十\s*/g, ') + ');
     s = s.replace(/KkHz|Kkhz|kkHz/g, 'kHz').replace(/(\d)\s*[kK]\s*H\s*z/g, '$1 kHz');
     s = s.replace(/^\s*第\s*(\d+)\s*[訓題题顯趣是韻]/, '第$1題');
+    s = s.replace(/\bf\s*[lI|]\s*=/g, 'f1 =').replace(/\bf\s*[oO]\s*=/g, 'f0 =');
+    s = s.replace(/^([\s‧•·。]*)A\s*=\s*(\d+(?:\.\d+)?)\s*$/, '$1Ac = $2');
     s = s.replace(/K\s*[,._]?\s*a?\s*[=二]\s*0?\s*\.?\s*([1-9])\b/g, 'Ka = 0.$1');
-    s = s.replace(/(sin|sim|sln|s1n|cos|c0s|cas)\s*[(|\[{]?\s*2\s*(?:7r|7t|7n|[%7nrxπ]|pi)?\s*[.·\-*,~«»:]*\s*(\d+(?:\.\d+)?)\s*(?:([x×*X~«])\s*10\s*(\^?\s*\{?\s*\d\s*\}?|[%°³])?)?\s*([t47l]?)\s*[1l]?\s*[)\]|}]?/g,
+    s = s.replace(/(sin|sim|sln|s1n|cos|c0s|cas)\s*[(|\[{]?\s*2\s*(?:7r|7t|7n|[%7nrxπmwT]|pi)?\s*[.·\-*,~«»:]*\s*(\d+(?:\.\d+)?)\s*(?:([x×*X~«])\s*10\s*(\^?\s*\{?\s*\d\s*\}?|[%°³])?)?\s*([t47l]?)\s*[1l]?\s*[)\]|}]?/g,
       (m, fn, F, x, ex, tt) => {
         let f = F;
         if (!x && !tt && /\d1$/.test(F) && !/\./.test(F)) f = F.slice(0, -1);
@@ -1200,7 +1201,8 @@ function readSummary(txt) {
   if (P.tones.length) rows.push('訊號：' + P.tones.map((t, i) => (i ? (t.A < 0 ? ' − ' : ' + ') : '') + Math.abs(t.A) + ' ' + t.fn + '(2π·' + fmtHz(t.F) + '·t)').join(''));
   const kv = [];
   if (P.Ac !== undefined) kv.push('Ac = ' + P.Ac);
-  if (P.fc) kv.push('fc = ' + fmtHz(P.fc));
+  const isNyq = parts.some((x) => x.kind === 'nyq');
+  if (P.fc) kv.push((isNyq && !P.fs ? 'fs = ' : 'fc = ') + fmtHz(P.fc));
   if (P.Ka !== undefined) kv.push('Ka = ' + P.Ka);
   if (P.fs) kv.push('fs = ' + fmtHz(P.fs));
   if (P.f0) kv.push('f0 = ' + fmtHz(P.f0));
@@ -1211,7 +1213,7 @@ function readSummary(txt) {
   if (kv.length) rows.push('參數：' + kv.join('，'));
   const body = txt.split('\n').filter((ln) => !(/(^|[^A-Za-z])(?:[ce]\s*\(\s*t\s*\)|ct)\s*[=—-]|A\s*[c.,]\s*\.?\s*cos|載波/.test(ln) && /cos|c0s/.test(ln) && !/m\s*\(\s*t\s*\)\s*=/.test(ln))).join('\n');
   const codeRe = /\*\s*(?:sin|cos)\s*\(\s*2\s*\*\s*pi\s*\*/g;
-  const nSin = codeRe.test(body) ? (body.match(codeRe) || []).length : (body.match(/(?:^|[^a-z])(?:s[i1l][nm]|c[o0a]s)\s*[(|\[{]/gi) || []).length;
+  const nSin = codeRe.test(body) ? (body.match(codeRe) || []).length : (body.match(/(?:^|[^a-z])(?:s[i1l][nm]|c[o0a]s)\s*[(|\[{]\s*2\s*\S{0,3}?\s*[.·\-*,~«:]*\s*\d/gi) || []).length;
   const confirmed = [...txt.matchAll(/f_?\d?\s*=\s*(\d+(?:\.\d+)?)\s*(k?)Hz/gi)].map((m) => +m[1] * (m[2] ? 1e3 : 1));
   const unsure = (ocrClean.unsure || []).filter((f) => /^\d*[1-9]0$/.test(f) && !confirmed.includes(+f) && P.tones.some((t) => t.F === +f));
   const defaulted = parts.some((x) => x.info.some((s) => /未指定|未給/.test(s)));
