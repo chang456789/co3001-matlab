@@ -72,6 +72,11 @@ a.btn { color: inherit; text-decoration: none; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn[disabled] { opacity: .55; cursor: default; }
 .status { font-size: 12.5px; color: var(--muted); }
+#imgStatus { width: 100%; }
+.rd { font-size: 13.5px; color: var(--ink); font-weight: 500; }
+.rd.warn { color: #b42318; font-weight: 600; }
+.rd-list { margin: 6px 0 0; padding: 8px 12px 8px 26px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); font-size: 13.5px; color: var(--ink); display: grid; gap: 2px; }
+.rd-note { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
 .drop { margin-top: 10px; border: 1.5px dashed var(--line); border-radius: var(--r); padding: 12px; background: var(--bg); display: grid; gap: 10px; }
 .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
 .drop-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--muted); }
@@ -188,7 +193,7 @@ ul.info b { color: var(--ink); font-weight: 500; }
     <div>
       <div class="eyebrow">CO3001 通訊工程 · MATLAB 實驗</div>
       <h1>MATLAB <span class="m">指令台</span></h1>
-      <nav class="nav" aria-label="頁面區塊"><a href="#libH">六週題庫</a><a href="#slideH">上課簡報</a><a href="#fileH">課堂檔案</a><a href="#genH">指令台</a></nav>
+      <nav class="nav" aria-label="頁面區塊"><a href="#libH">六週題庫</a><a href="#slideH">上課簡報</a><a href="#genH">指令台</a><a href="#fileH">課堂檔案</a></nav>
     </div>
     <dl class="exam">
       <dt>期中考</dt><dd class="hot">10/27（二）18:10 – 20:10</dd>
@@ -213,11 +218,6 @@ ul.info b { color: var(--ink); font-weight: 500; }
     <div class="sec-h"><h2 id="slideH">上課簡報<small>老師原始檔，依週次分類</small></h2></div>
     <div class="deck-tabs" id="deckTabs" role="group" aria-label="選擇簡報"></div>
     <div class="viewer" id="viewer"></div>
-  </section>
-
-  <section aria-labelledby="fileH">
-    <div class="sec-h"><h2 id="fileH">課堂檔案<small>原始講義 PDF、結報與每一題的 .m 檔</small></h2></div>
-    <div id="files"></div>
   </section>
 
   <section aria-labelledby="genH">
@@ -265,6 +265,11 @@ ul.info b { color: var(--ink); font-weight: 500; }
         <pre class="code" id="out"></pre>
       </div>
     </div>
+  </section>
+
+  <section aria-labelledby="fileH">
+    <div class="sec-h"><h2 id="fileH">課堂檔案<small>原始講義 PDF、結報與每一題的 .m 檔</small></h2></div>
+    <div id="files"></div>
   </section>
 
   <p class="foot">整個資料夾可離線使用：解壓縮後直接開 index.html。程式碼以 GNU Octave 實際執行驗證（繪圖部分以檢查器代跑，正式圖形請在學校 MATLAB 確認）。題庫程式碼照老師投影片，只把頻率軸統一成 (−N/2:N/2−1)*fs/N。</p>
@@ -399,8 +404,11 @@ const MGEN = (() => {
     if (kept) P.keep = [...kept[1].matchAll(new RegExp(String.raw`(${NUM})${UNIT}`, 'g'))].map(x => val(x[1], null, x[2]));
 
     const tones = [];
+    const sT = s.split('\n').map((ln) => (/(^|[^A-Za-z])(?:[ce]\s*\(\s*t\s*\)|ct)\s*[=—-]|A\s*[c.,]\s*\.?\s*cos|載波/.test(ln) && /cos|c0s/.test(ln) && !/m\s*\(\s*t\s*\)\s*=/.test(ln) ? '' : ln)).join('\n');
     const reTone = new RegExp(String.raw`([+-])?\s*(${NUM}|\d*\.?\d+)?\s*\*?\s*(sin|cos)\s*\(\s*2\s*\*?\s*pi\s*\*?\s*\(?\s*(${NUM})${POW}\s*(k|K)?\s*\)?\s*\*?\s*t\s*\)`, 'g');
-    for (const x of s.matchAll(reTone)) {
+    const codeStyle = /\*\s*(?:sin|cos)\s*\(\s*2\s*\*\s*pi\s*\*/.test(sT);
+    for (const x of sT.matchAll(reTone)) {
+      if (codeStyle && !/\*\s*(?:sin|cos)\s*\(\s*2\s*\*\s*pi\s*\*/.test(x[0]) && !/\*\s*$/.test(sT.slice(Math.max(0, x.index - 3), x.index + (x[1] ? 1 : 0) + (x[2] || '').length + 3))) continue;
       let A = x[2] !== undefined && x[2] !== '' ? parseFloat(x[2]) : 1;
       if (x[1] === '-') A = -Math.abs(A);
       tones.push({ A, F: val(x[4], x[5], x[6]), fn: x[3] });
@@ -465,7 +473,7 @@ const MGEN = (() => {
     else if (F.square) kind = 'square';
     else if (F.sinc) kind = 'sinc';
     else if (F.conv) kind = 'conv';
-    else if (F.matrix || P.mats.length >= 2) kind = 'matrix';
+    else if ((F.matrix && P.tones.length < 2) || P.mats.length >= 2) kind = 'matrix';
     else if (F.sines) kind = 'sines';
     else if (F.spec && P.tones.length) kind = 'sines';
     return { kind, F };
@@ -577,9 +585,14 @@ const MGEN = (() => {
       const lowEdge = () => { const b = below.length ? Math.max(...below) : 0; return Math.max(kmin - 10, (b + kmin) / 2); };
       const highEdge = () => { const a = above.length ? Math.min(...above) : Infinity; return Math.min(kmax + 10, (kmax + a) / 2, ty === 'lpf' ? kmax + 1 : Infinity); };
       if (ty === 'lpf') {
-        const c = (P.cutoff && types.length === 1) ? P.cutoff : highEdge();
-        L.push(`B = ${fm(2 * c)};`, 'h_lpf = B*sinc(B*t)/fs;');
-        info.push(`LPF 截止 ${fm(c)} Hz（B = ${fm(2 * c)}，rect(f/B)）`);
+        if (P.cutoff && types.length === 1) {
+          L.push(`B = ${fm(P.cutoff)};`, 'h_lpf = B*sinc(B*t)/fs;');
+          info.push(`LPF 照講義寫法 rect(f/${fm(P.cutoff)})：B = ${fm(P.cutoff)}，實際通帶 ±${fm(P.cutoff / 2)} Hz`);
+        } else {
+          const c = highEdge();
+          L.push(`B = ${fm(2 * c)};`, 'h_lpf = B*sinc(B*t)/fs;');
+          info.push(`LPF 截止 ${fm(c)} Hz（B = ${fm(2 * c)}，rect(f/B)）`);
+        }
       } else if (ty === 'bpf') {
         let lo = lowEdge(), hi = highEdge();
         if (P.pass && P.pass[1] != null && types.length === 1) { lo = P.pass[0]; hi = P.pass[1]; }
@@ -709,7 +722,7 @@ const MGEN = (() => {
     const fmax = Math.max(...tones.map(t => t.F));
     const Bf = Math.max(fmax, 8e3);
     L.push(`Ka = ${fm(Ka)};`, 'ct = Ac*cos(2*pi*fc*t);', '', 'st = Ac*(1 + Ka*mt).*ct;');
-    const sync = F.demod && (!F.env || /同步|乘法|synchronous|coherent/i.test(P.s));
+    const sync = F.demod && !/除了同步|除同步|besides synchronous/i.test(P.s) && (!F.env || /同步|乘法|synchronous|coherent/i.test(P.s));
     if (sync) L.push('', 'et = st.*ct;', '', `lpf = sinc(2.5*${fm(Bf)}*t)/N*(2.5*${fm(Bf)})/2;`, '', "yt = conv(et, lpf, 'same');", 'yt = yt - mean(yt);');
     L.push('', 'figure');
     modPlots(L, sync ? 4 : 2);
@@ -1047,6 +1060,7 @@ const drop = $('drop');
 drop.addEventListener('drop', async (e) => { e.preventDefault(); if (e.dataTransfer) await addFiles(e.dataTransfer.files); });
 
 function ocrClean(lines) {
+  ocrClean.unsure = [];
   const CJK = '\\u3400-\\u9fff\\u3000-\\u303f\\uff00-\\uffef';
   const out = [];
   for (let s of lines) {
@@ -1055,10 +1069,13 @@ function ocrClean(lines) {
     s = s.replace(/([A-Za-z0-9)\]）])\s*[二三]\s*(?=[-\d.A-Za-z(])/g, '$1 = ');
     s = s.replace(/\)\s*十\s*/g, ') + ');
     s = s.replace(/KkHz|Kkhz|kkHz/g, 'kHz').replace(/(\d)\s*[kK]\s*H\s*z/g, '$1 kHz');
-    s = s.replace(/(sin|sim|sln|s1n|cos|c0s|cas)\s*[(|\[{]\s*2\s*(?:7r|7t|7n|[7nrxπ]|pi)?\s*[.·\-*,，]?\s*(\d+(?:\.\d+)?)\s*(?:([x×*X])\s*10\s*(\^?\s*\{?\s*\d\s*\}?|[%°³])?)?\s*([t4]?)\s*[1l]?\s*[)\]|}]/g,
+    s = s.replace(/^\s*第\s*(\d+)\s*[訓題题顯趣是韻]/, '第$1題');
+    s = s.replace(/K\s*[,._]?\s*a?\s*[=二]\s*0?\s*\.?\s*([1-9])\b/g, 'Ka = 0.$1');
+    s = s.replace(/(sin|sim|sln|s1n|cos|c0s|cas)\s*[(|\[{]?\s*2\s*(?:7r|7t|7n|[%7nrxπ]|pi)?\s*[.·\-*,~«»:]*\s*(\d+(?:\.\d+)?)\s*(?:([x×*X~«])\s*10\s*(\^?\s*\{?\s*\d\s*\}?|[%°³])?)?\s*([t47l]?)\s*[1l]?\s*[)\]|}]?/g,
       (m, fn, F, x, ex, tt) => {
         let f = F;
         if (!x && !tt && /\d1$/.test(F) && !/\./.test(F)) f = F.slice(0, -1);
+        if (!x && !tt) ocrClean.unsure.push(f);
         let e = '';
         if (x) { const d = ex && ex.match(/\d/); e = '×10^' + (d ? d[0] : '3'); }
         return (/^c/.test(fn) ? 'cos' : 'sin') + '(2π·' + f + e + ' t)';
@@ -1090,7 +1107,7 @@ async function runOCR(signal) {
   for (let i = 0; i < imgs.length; i++) {
     if (signal.aborted) throw new DOMException('aborted', 'AbortError');
     const { data } = await tessWorker.recognize(imgs[i].ocr, {}, { blocks: true });
-    for (const b of data.blocks || []) for (const p of b.paragraphs) for (const l of p.lines) if (l.confidence >= 40) all.push(l.text.trim());
+    for (const b of data.blocks || []) for (const p of b.paragraphs) for (const l of p.lines) { const tx = l.text.trim(); if (l.confidence >= 40 || (l.confidence >= 12 && /s[i1l][nm]|c[o0]s|=|Hz|kHz|sec|K\s*a|f\s*[sc0]/i.test(tx))) all.push(tx); }
   }
   return ocrClean(all);
 }
@@ -1170,14 +1187,51 @@ async function runGemini(signal, extra, onText) {
   return text;
 }
 let readCtl = null;
+function fmtHz(v) { return v >= 1e6 ? +(v / 1e6).toPrecision(6) + ' MHz' : v >= 1e3 ? +(v / 1e3).toPrecision(6) + ' kHz' : +v.toPrecision(6) + ' Hz'; }
+function readSummary(txt) {
+  const parts = MGEN.generate(txt).parts.filter((x) => x.ok);
+  const P = MGEN.parse(txt);
+  const rows = [];
+  if (parts.length) rows.push('題型：' + parts.map((x) => (x.q ? 'Q' + x.q + ' ' : '') + x.name).join('、'));
+  if (P.tones.length) rows.push('訊號：' + P.tones.map((t, i) => (i ? (t.A < 0 ? ' − ' : ' + ') : '') + Math.abs(t.A) + ' ' + t.fn + '(2π·' + fmtHz(t.F) + '·t)').join(''));
+  const kv = [];
+  if (P.Ac !== undefined) kv.push('Ac = ' + P.Ac);
+  if (P.fc) kv.push('fc = ' + fmtHz(P.fc));
+  if (P.Ka !== undefined) kv.push('Ka = ' + P.Ka);
+  if (P.fs) kv.push('fs = ' + fmtHz(P.fs));
+  if (P.f0) kv.push('f0 = ' + fmtHz(P.f0));
+  if (P.trange) kv.push('t = ' + P.trange[0] + ' ~ ' + P.trange[1] + ' s');
+  if (P.fsList) kv.push('fs_num = ' + P.fsList.map(fmtHz).join('、'));
+  if (P.cutoff) kv.push('截止 ' + fmtHz(P.cutoff));
+  if (P.pass) kv.push('通帶 ' + P.pass[0] + (P.pass[1] ? ' ~ ' + P.pass[1] : ' 以上') + ' Hz');
+  if (kv.length) rows.push('參數：' + kv.join('，'));
+  const body = txt.split('\n').filter((ln) => !(/(^|[^A-Za-z])(?:[ce]\s*\(\s*t\s*\)|ct)\s*[=—-]|A\s*[c.,]\s*\.?\s*cos|載波/.test(ln) && /cos|c0s/.test(ln) && !/m\s*\(\s*t\s*\)\s*=/.test(ln))).join('\n');
+  const codeRe = /\*\s*(?:sin|cos)\s*\(\s*2\s*\*\s*pi\s*\*/g;
+  const nSin = codeRe.test(body) ? (body.match(codeRe) || []).length : (body.match(/(?:^|[^a-z])(?:s[i1l][nm]|c[o0a]s)\s*[(|\[{]/gi) || []).length;
+  const confirmed = [...txt.matchAll(/f_?\d?\s*=\s*(\d+(?:\.\d+)?)\s*(k?)Hz/gi)].map((m) => +m[1] * (m[2] ? 1e3 : 1));
+  const unsure = (ocrClean.unsure || []).filter((f) => /^\d*[1-9]0$/.test(f) && !confirmed.includes(+f) && P.tones.some((t) => t.F === +f));
+  const defaulted = parts.some((x) => x.info.some((s) => /未指定|未給/.test(s)));
+  const xRefs = [...txt.matchAll(/x_?([1-9])\b/gi)].map((m) => +m[1]);
+  const needX = xRefs.length ? Math.max(...xRefs) : 0;
+  const warn = (nSin > P.tones.length) || (needX > P.tones.length && P.tones.length > 0 && !/m\s*\(\s*t/.test(txt));
+  return { rows, warn, unsure, defaulted, ok: parts.length > 0 };
+}
 async function doOCR() {
   $('imgStatus').textContent = '辨識中…';
   const txt = await runOCR(readCtl.signal);
   if (!txt.trim()) { $('imgStatus').textContent = '圖片裡沒讀到文字，換一張清楚一點的截圖試試。'; return; }
   $('cmd').value = txt; runLocal();
-  const ok = lastLocal !== '';
-  $('imgStatus').textContent = ok ? '已辨識並生成。辨識結果已填進上面的框，請對一下公式裡的數字，有錯直接改，程式碼會跟著更新。' : '已把辨識文字填進上面的框，但看不出題型；補上關鍵字（例如 DSB-SC、低通、AM）就會出程式碼。';
-  $('cmd').focus();
+  const r = readSummary(txt);
+  const box = $('imgStatus'); box.innerHTML = '';
+  const head = document.createElement('div');
+  head.className = r.warn ? 'rd warn' : 'rd';
+  head.textContent = !r.ok ? '已把辨識文字填進上面的框，但看不出題型：補上關鍵字（例如 DSB-SC、低通、AM）就會出程式碼。'
+    : r.warn ? '⚠ 截圖裡的公式沒有完整讀到，請對照截圖改上面框裡的 m(t)／x(t)，程式碼會跟著更新。'
+    : '已讀圖並生成程式碼。請花 3 秒對照截圖確認下面的數字：';
+  box.append(head);
+  if (r.rows.length) { const ul = document.createElement('ul'); ul.className = 'rd-list'; r.rows.forEach((t) => { const li = document.createElement('li'); li.textContent = t; ul.append(li); }); box.append(ul); }
+  if (r.unsure.length && r.ok) { const n = document.createElement('div'); n.className = 'rd warn'; n.style.marginTop = '6px'; n.textContent = '⚠ 這個頻率可能多讀了一位（例如 2t 被讀成 20）：' + [...new Set(r.unsure)].join('、') + ' Hz，請對照截圖。'; box.append(n); }
+  if (r.defaulted && r.ok) { const n = document.createElement('div'); n.className = 'rd-note'; n.textContent = '右邊「▸」列出的「未指定 → …」是用講義預設值補上的，截圖上若有寫不同數字，請在上面的框補上。'; box.append(n); }
 }
 $('readBtn').onclick = async () => {
   if (!imgs.length) return;
