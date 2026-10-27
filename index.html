@@ -77,6 +77,7 @@ a.btn { color: inherit; text-decoration: none; }
 .rd.warn { color: #b42318; font-weight: 600; }
 .rd-list { margin: 6px 0 0; padding: 8px 12px 8px 26px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); font-size: 13.5px; color: var(--ink); display: grid; gap: 2px; }
 .rd-note { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
+.rd-note.ok { color: var(--ok); font-weight: 600; font-size: 13px; }
 .drop { margin-top: 10px; border: 1.5px dashed var(--line); border-radius: var(--r); padding: 12px; background: var(--bg); display: grid; gap: 10px; }
 .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
 .drop-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--muted); }
@@ -1121,8 +1122,11 @@ async function gemListModels(key) {
   const j = await r.json();
   const ms = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes('generateContent')).map((m) => m.name.replace(/^models\//, ''))
     .filter((n) => /^gemini/.test(n) && !/(tts|image|live|embedding|audio|transcribe|robotics|computer|aqa)/i.test(n));
-  const score = (n) => (/flash/.test(n) ? 0 : 10) + (/lite/.test(n) ? 3 : 0) + (/preview|exp/.test(n) ? 2 : 0) - (parseFloat((n.match(/gemini-(\d+(?:\.\d+)?)/) || [0, 0])[1]) || 0) / 100;
-  return ms.sort((a, b) => score(a) - score(b));
+  return sortModels(ms);
+}
+function sortModels(ms) {
+  const score = (n) => (/flash/.test(n) ? 0 : 10) - (/lite/.test(n) ? 3 : 0) + (/preview|exp/.test(n) ? 2 : 0) - (parseFloat((n.match(/gemini-(\d+(?:\.\d+)?)/) || [0, 0])[1]) || 0) / 100;
+  return [...ms].sort((a, b) => score(a) - score(b));
 }
 function fillModels(list) {
   const sel = $('gemModel'); sel.innerHTML = '';
@@ -1130,7 +1134,7 @@ function fillModels(list) {
   const saved = store.get('gemModel'); if (saved && list.includes(saved)) sel.value = saved;
   store.set('gemModel', sel.value); store.set('gemModels', JSON.stringify(list));
 }
-try { const l = JSON.parse(store.get('gemModels') || '[]'); if (l.length) fillModels(l); } catch (e) {}
+try { const l = sortModels(JSON.parse(store.get('gemModels') || '[]')); if (l.length) { if (store.get('gemPickV') !== '2') { store.set('gemModel', l[0]); store.set('gemPickV', '2'); } fillModels(l); } } catch (e) {}
 $('gemKey').value = gemKey();
 $('gemBtn').onclick = () => { const b = $('gemBox'); b.hidden = !b.hidden; $('gemBtn').setAttribute('aria-expanded', String(!b.hidden)); };
 $('gemModel').onchange = () => store.set('gemModel', $('gemModel').value);
@@ -1233,32 +1237,59 @@ async function doOCR() {
   if (r.unsure.length && r.ok) { const n = document.createElement('div'); n.className = 'rd warn'; n.style.marginTop = '6px'; n.textContent = '⚠ 這個頻率可能多讀了一位（例如 2t 被讀成 20）：' + [...new Set(r.unsure)].join('、') + ' Hz，請對照截圖。'; box.append(n); }
   if (r.defaulted && r.ok) { const n = document.createElement('div'); n.className = 'rd-note'; n.textContent = '右邊「▸」列出的「未指定 → …」是用講義預設值補上的，截圖上若有寫不同數字，請在上面的框補上。'; box.append(n); }
 }
+function gemLine(msg, cls) {
+  let el = document.getElementById('gemLine');
+  if (!el) { el = document.createElement('div'); el.id = 'gemLine'; }
+  el.className = 'rd-note' + (cls ? ' ' + cls : ''); el.textContent = msg;
+  $('imgStatus').append(el);
+}
 $('readBtn').onclick = async () => {
   if (!imgs.length) return;
   clearTimeout(deb);
   readCtl = new AbortController();
+  const outer = readCtl.signal;
   $('readBtn').disabled = true; $('readStop').hidden = false;
+  const extra = $('cmd').value.trim() && !EXAMPLES.some(([, t]) => t === $('cmd').value) ? $('cmd').value.trim() : '';
+  let gemDone = false, ocrDone = false, gemCode = '';
+  const showGem = () => {
+    aiCode = gemCode; mode = 'ai'; renderCode($('out'), aiCode);
+    $('det').innerHTML = '<span class="tag src">Gemini 讀圖生成</span>';
+    $('info').innerHTML = '<li>已換成 Gemini 看圖寫的版本；改左邊的字會切回文字辨識版</li>';
+    gemLine('✓ 已換成 Gemini 版本（公式讀得較準）。建議在 MATLAB 跑一次確認。', 'ok');
+  };
+  const gemTask = gemKey() ? (async () => {
+    const gc = new AbortController();
+    const stop = () => gc.abort();
+    outer.addEventListener('abort', stop);
+    const timer = setTimeout(stop, 40000);
+    let text = '';
+    try {
+      text = await runGemini(gc.signal, extra, () => {});
+      const code = cleanAI(text);
+      if (!code) throw new Error('empty');
+      gemDone = true; gemCode = code;
+      if (ocrDone) showGem();
+    } catch (e) {
+      if (outer.aborted) return;
+      const why = e.name === 'AbortError' ? 'Gemini 超過 40 秒沒回應' : e instanceof TypeError ? '連不到 Gemini' : e.status === 429 ? 'Gemini 免費額度暫時用完' : e.status === 400 || e.status === 401 || e.status === 403 ? 'Gemini Key 或模型有問題' : 'Gemini 發生錯誤';
+      gemLine(why + '，維持文字辨識的結果。');
+    } finally { clearTimeout(timer); outer.removeEventListener('abort', stop); }
+  })() : null;
   try {
-    if (gemKey()) {
-      $('imgStatus').textContent = 'Gemini 讀題中…';
-      const extra = $('cmd').value.trim() && !EXAMPLES.some(([, t]) => t === $('cmd').value) ? $('cmd').value.trim() : '';
-      let started = false;
-      try {
-        await runGemini(readCtl.signal, extra, (t) => {
-          if (!started) { started = true; mode = 'ai'; $('det').innerHTML = '<span class="tag src">Gemini 讀圖生成</span>'; $('info').innerHTML = '<li>改左邊的字會切回即時規則生成</li>'; }
-          aiCode = cleanAI(t); renderCode($('out'), aiCode); $('imgStatus').textContent = 'Gemini 撰寫中…';
-        });
-        $('imgStatus').textContent = started ? '完成。建議在 MATLAB 跑一次確認。' : 'Gemini 沒有回傳內容，改用內建文字辨識…';
-        if (!started) await doOCR();
-      } catch (e) {
-        if (e.name === 'AbortError') throw e;
-        const why = e instanceof TypeError ? '連不到 Gemini' : e.status === 429 ? 'Gemini 免費額度暫時用完' : e.status === 400 || e.status === 403 ? 'Gemini Key 或模型有問題' : 'Gemini 發生錯誤';
-        toast(why + '，改用內建文字辨識');
-        await doOCR();
-      }
-    } else {
+    try {
+      $('imgStatus').textContent = '文字辨識中…' + (gemTask ? '（Gemini 同時在讀）' : '');
       await doOCR();
+      ocrDone = true;
+      if (gemDone) showGem();
+      else if (gemTask) gemLine('Gemini 還在讀題，讀完會自動換成 Gemini 的版本；不想等可以直接用上面這份。');
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      if (!gemTask) throw e;
+      ocrDone = true;
+      $('imgStatus').textContent = '文字辨識失敗，等 Gemini 結果…';
+      if (gemDone) showGem();
     }
+    if (gemTask) await gemTask;
   } catch (e) {
     if (e.name === 'AbortError') $('imgStatus').textContent = '已停止。';
     else if (e.message === 'offline') $('imgStatus').textContent = '讀圖需要網路（第一次要下載辨識引擎）。離線時請照圖把關鍵字和數字打進上面的框。';
